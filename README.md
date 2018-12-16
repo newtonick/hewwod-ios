@@ -19,4 +19,4 @@ Open the project hewwod.xcodeproj in Xcode. Build and Run
 
 ## Screenshots
 
-... coming soon
+![iPhone XR Screenshot of HEW WOD App](/Screenshots/iPhone%20XR%20HEW%20WOD.png)
