@@ -174,7 +174,8 @@ class WorkoutsTableViewController: UITableViewController {
                 os_log("Web and Archive Counts Different, Loading from Web, Reloading Table, and Saving", log: OSLog.default, type: .debug)
                 self.workouts = self.webWorkouts
                 AppDelegate.saveToArchive(workouts: self.workouts)
-                self.tableView.reloadSections(IndexSet([0]), with: .bottom)
+                //self.tableView.reloadSections(IndexSet([0]), with: .bottom)
+                self.tableView.reloadData()
                 return
             }
             
@@ -190,7 +191,8 @@ class WorkoutsTableViewController: UITableViewController {
                     os_log("Web and Archive Non Match Found, Loading from Web, Realoding Table, and Saving", log: OSLog.default, type: .debug)
                     self.workouts = self.webWorkouts
                     AppDelegate.saveToArchive(workouts: self.workouts)
-                    self.tableView.reloadSections(IndexSet([0]), with: .bottom)
+                    //self.tableView.reloadSections(IndexSet([0]), with: .bottom)
+                    self.tableView.reloadData()
                     return
                 }
                 match = false
@@ -208,7 +210,8 @@ class WorkoutsTableViewController: UITableViewController {
             os_log("Web Load Complete", log: OSLog.default, type: .debug)
             self.workouts = self.webWorkouts
             AppDelegate.saveToArchive(workouts: self.workouts)
-            self.tableView.reloadSections(IndexSet([0]), with: .bottom)
+            //self.tableView.reloadSections(IndexSet([0]), with: .bottom)
+            self.tableView.reloadData()
         }
     }
 }
