@@ -20,34 +20,14 @@
 	<string>0.2.0</string>
 	<key>CFBundleVersion</key>
 	<string>12</string>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
-	<key>LSRequiresIPhoneOS</key>
-	<true/>
-	<key>UIAppFonts</key>
-	<array>
-		<string>fa-solid-900.ttf</string>
-	</array>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>fetch</string>
-		<string>remote-notification</string>
-	</array>
-	<key>UILaunchStoryboardName</key>
-	<string>LaunchScreen</string>
-	<key>UIMainStoryboardFile</key>
-	<string>Main</string>
-	<key>UIRequiredDeviceCapabilities</key>
-	<array>
-		<string>armv7</string>
-	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
-	<key>UISupportedInterfaceOrientations~ipad</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-	</array>
+	<key>WKCompanionAppBundleIdentifier</key>
+	<string>com.klockenga.hewwod</string>
+	<key>WKWatchKitApp</key>
+	<true/>
 </dict>
 </plist>
