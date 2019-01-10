@@ -7,11 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		541D2EDC21E7D6B800C68E0F /* ComplicationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 541D2EDB21E7D6B800C68E0F /* ComplicationController.swift */; };
 		5435232F21B71847009C98E7 /* SwiftyJsonExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5435232E21B71847009C98E7 /* SwiftyJsonExtension.swift */; };
 		5437A3BB21BC525400533CFC /* NKMarkupParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 5437A3B921BC525400533CFC /* NKMarkupParser.m */; };
 		54422A9421B1E54500DB923D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54422A9321B1E54500DB923D /* AppDelegate.swift */; };
 		54422A9B21B1E54700DB923D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 54422A9A21B1E54700DB923D /* Assets.xcassets */; };
 		54422A9E21B1E54700DB923D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 54422A9C21B1E54700DB923D /* LaunchScreen.storyboard */; };
+		5459DAC321E6A1A200DD2B61 /* SwiftyJSON.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5459DAC021E6A17C00DD2B61 /* SwiftyJSON.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		5459DAC521E6F16700DD2B61 /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5459DAC021E6A17C00DD2B61 /* SwiftyJSON.framework */; };
 		5477B15D21B6CBD200C2153C /* WorkoutTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5477B15C21B6CBD200C2153C /* WorkoutTableViewCell.swift */; };
 		5477B16121B6D11700C2153C /* WorkoutsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5477B16021B6D11700C2153C /* WorkoutsTableViewController.swift */; };
 		5477B16321B6D1C000C2153C /* Workout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5477B16221B6D1C000C2153C /* Workout.swift */; };
@@ -28,10 +31,11 @@
 		54C8AC4921E545B0004BD138 /* NotificationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54C8AC4821E545B0004BD138 /* NotificationController.swift */; };
 		54C8AC4B21E545B0004BD138 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 54C8AC4A21E545B0004BD138 /* Assets.xcassets */; };
 		54C8AC5021E545B0004BD138 /* HEW WOD Watch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 54C8AC3321E545AC004BD138 /* HEW WOD Watch.app */; };
+		54D6FBE021E64F8900425717 /* NKMarkupParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 5437A3B921BC525400533CFC /* NKMarkupParser.m */; };
 		54ECD53B21C5B8C600B27F7B /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54ECD53A21C5B8C600B27F7B /* Alamofire.framework */; };
 		54ECD53D21C5B8CE00B27F7B /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54ECD53C21C5B8CE00B27F7B /* SwiftyJSON.framework */; };
-		54ECD53E21C5B9CC00B27F7B /* Alamofire.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 54ECD53A21C5B8C600B27F7B /* Alamofire.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		54ECD53F21C5B9D200B27F7B /* SwiftyJSON.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 54ECD53C21C5B8CE00B27F7B /* SwiftyJSON.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		54ECD53E21C5B9CC00B27F7B /* Alamofire.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 54ECD53A21C5B8C600B27F7B /* Alamofire.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		54ECD53F21C5B9D200B27F7B /* SwiftyJSON.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 54ECD53C21C5B8CE00B27F7B /* SwiftyJSON.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,6 +68,17 @@
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		549FB9EB21E69C6600F7056F /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				5459DAC321E6A1A200DD2B61 /* SwiftyJSON.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		54C8AC5621E545B0004BD138 /* Embed App Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -89,6 +104,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		541D2EDB21E7D6B800C68E0F /* ComplicationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComplicationController.swift; sourceTree = "<group>"; };
 		5435232E21B71847009C98E7 /* SwiftyJsonExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SwiftyJsonExtension.swift; path = Source/SwiftyJsonExtension.swift; sourceTree = SOURCE_ROOT; };
 		5437A3AA21BC525400533CFC /* HEW WOD-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "HEW WOD-Bridging-Header.h"; sourceTree = "<group>"; };
 		5437A3B921BC525400533CFC /* NKMarkupParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NKMarkupParser.m; sourceTree = "<group>"; };
@@ -98,6 +114,7 @@
 		54422A9A21B1E54700DB923D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		54422A9D21B1E54700DB923D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		54422A9F21B1E54700DB923D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5459DAC021E6A17C00DD2B61 /* SwiftyJSON.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftyJSON.framework; path = Carthage/Build/watchOS/SwiftyJSON.framework; sourceTree = SOURCE_ROOT; };
 		5477B15C21B6CBD200C2153C /* WorkoutTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutTableViewCell.swift; sourceTree = "<group>"; };
 		5477B16021B6D11700C2153C /* WorkoutsTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutsTableViewController.swift; sourceTree = "<group>"; };
 		5477B16221B6D1C000C2153C /* Workout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Workout.swift; sourceTree = "<group>"; };
@@ -132,10 +149,18 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		549FB9E121E69C2300F7056F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		54C8AC3C21E545B0004BD138 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5459DAC521E6F16700DD2B61 /* SwiftyJSON.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -210,6 +235,7 @@
 			children = (
 				54C8AC4421E545B0004BD138 /* InterfaceController.swift */,
 				54C8AC4621E545B0004BD138 /* ExtensionDelegate.swift */,
+				541D2EDB21E7D6B800C68E0F /* ComplicationController.swift */,
 				54C8AC4821E545B0004BD138 /* NotificationController.swift */,
 				54C8AC4A21E545B0004BD138 /* Assets.xcassets */,
 				54C8AC4C21E545B0004BD138 /* Info.plist */,
@@ -221,6 +247,7 @@
 		54ECD54021C5BA2F00B27F7B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				5459DAC021E6A17C00DD2B61 /* SwiftyJSON.framework */,
 				54ECD53A21C5B8C600B27F7B /* Alamofire.framework */,
 				54ECD53C21C5B8CE00B27F7B /* SwiftyJSON.framework */,
 			);
@@ -239,6 +266,7 @@
 				54422A8E21B1E54500DB923D /* Resources */,
 				5477B15B21B6BFC200C2153C /* Embed Frameworks */,
 				54C8AC5821E545B0004BD138 /* Embed Watch Content */,
+				5459DAC421E6F02600DD2B61 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -256,6 +284,7 @@
 			buildPhases = (
 				54C8AC3121E545AC004BD138 /* Resources */,
 				54C8AC5621E545B0004BD138 /* Embed App Extensions */,
+				549FB9E121E69C2300F7056F /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -274,6 +303,8 @@
 				54C8AC3B21E545B0004BD138 /* Sources */,
 				54C8AC3C21E545B0004BD138 /* Frameworks */,
 				54C8AC3D21E545B0004BD138 /* Resources */,
+				549FB9EB21E69C6600F7056F /* Embed Frameworks */,
+				5459DAC621E77D1600DD2B61 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -314,7 +345,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 54422A8B21B1E54500DB923D /* Build configuration list for PBXProject "hewwod" */;
+			buildConfigurationList = 54422A8B21B1E54500DB923D /* Build configuration list for PBXProject "HEW WOD" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -366,6 +397,49 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		5459DAC421E6F02600DD2B61 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Carthage/Build/iOS/Alamofire.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/SwiftyJSON.framework",
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/Alamofire.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/SwiftyJSON.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/usr/local/bin/carthage copy-frameworks\n";
+		};
+		5459DAC621E77D1600DD2B61 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Carthage/Build/watchOS/SwiftyJSON.framework",
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/SwiftyJSON.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/usr/local/bin/carthage copy-frameworks\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		54422A8C21B1E54500DB923D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -387,6 +461,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				54C8AC4921E545B0004BD138 /* NotificationController.swift in Sources */,
+				54D6FBE021E64F8900425717 /* NKMarkupParser.m in Sources */,
+				541D2EDC21E7D6B800C68E0F /* ComplicationController.swift in Sources */,
 				54C8AC4721E545B0004BD138 /* ExtensionDelegate.swift in Sources */,
 				54C8AC4521E545B0004BD138 /* InterfaceController.swift in Sources */,
 			);
@@ -605,8 +681,17 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = ZW85AH743B;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+					"$(PROJECT_DIR)",
+				);
 				IBSC_MODULE = HEW_WOD_Watch_Extension;
 				INFOPLIST_FILE = "HEW WOD Watch/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.klockenga.hewwod.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -624,8 +709,17 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = ZW85AH743B;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+					"$(PROJECT_DIR)",
+				);
 				IBSC_MODULE = HEW_WOD_Watch_Extension;
 				INFOPLIST_FILE = "HEW WOD Watch/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.klockenga.hewwod.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -642,6 +736,12 @@
 				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = ZW85AH743B;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/watchOS",
+					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = "HEW WOD Watch Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -652,6 +752,7 @@
 				PRODUCT_NAME = "${TARGET_NAME}";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "./Source/HEW WOD-Bridging-Header.h";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = 4;
 				WATCHOS_DEPLOYMENT_TARGET = 5.1;
@@ -664,6 +765,12 @@
 				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = ZW85AH743B;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/watchOS",
+					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = "HEW WOD Watch Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -674,6 +781,7 @@
 				PRODUCT_NAME = "${TARGET_NAME}";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "./Source/HEW WOD-Bridging-Header.h";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = 4;
 				WATCHOS_DEPLOYMENT_TARGET = 5.1;
@@ -683,7 +791,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		54422A8B21B1E54500DB923D /* Build configuration list for PBXProject "hewwod" */ = {
+		54422A8B21B1E54500DB923D /* Build configuration list for PBXProject "HEW WOD" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				54422AA021B1E54700DB923D /* Debug */,

@@ -30,11 +30,11 @@
     parser.italicFont = italicFont;
     parser.paragraphStyle = paragraphStyle;
     
-    if ([UILabel instancesRespondToSelector:@selector(attributedText)]) {
+    //if ([UILabel instancesRespondToSelector:@selector(attributedText)]) {
         [parser parse];
-    } else {
-        [parser strip];
-    }
+    //} else {
+    //    [parser strip];
+    //}
     return parser.attributedString;
 }
 

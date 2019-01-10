@@ -12,11 +12,11 @@
         <!--Interface Controller-->
         <scene sceneID="aou-V4-d1y">
             <objects>
-                <controller fullScreen="YES" id="AgC-eL-Hgc" customClass="InterfaceController" customModule="HEW_WOD_Watch" customModuleProvider="target">
+                <controller spacing="2" fullScreen="YES" id="AgC-eL-Hgc" customClass="InterfaceController" customModule="HEW_WOD_Watch" customModuleProvider="target">
                     <items>
                         <group width="1" alignment="left" radius="8" spacing="0.0" id="q2H-ot-TIX">
                             <items>
-                                <label alignment="left" text="This is the Title of the WOD that is longer than normal" textAlignment="center" numberOfLines="0" id="NBw-VO-moP">
+                                <label width="1" alignment="left" text="Loading ..." textAlignment="center" numberOfLines="0" id="NBw-VO-moP">
                                     <fontDescription key="font" style="UICTFontTextStyleHeadline"/>
                                 </label>
                             </items>
@@ -25,15 +25,11 @@
                         </group>
                         <group width="1" alignment="left" radius="8" spacing="0.0" id="XrQ-4p-ZnE">
                             <items>
-                                <label alignment="left" textAlignment="center" numberOfLines="0" id="0EF-JX-RhM">
-                                    <string key="text">1 minute Stations
-Station 1: Max Calorie Row
-Station 2: Medicine Ball Russian Twists
-Station 3: Sprawls
-Station 4: Weighted Get-Ups
-Station 5: Mountain Climbers
-Rest 1 minute</string>
-                                    <fontDescription key="font" type="system" pointSize="11"/>
+                                <label width="1" alignment="left" textAlignment="center" numberOfLines="0" id="0EF-JX-RhM">
+                                    <string key="text" base64-UTF8="YES">
+IAogCiAKIAogCiAKA
+</string>
+                                    <fontDescription key="font" type="system" pointSize="12"/>
                                 </label>
                             </items>
                             <color key="backgroundColor" red="0.37647058823529411" green="0.63137254901960782" blue="0.26666666666666666" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -42,6 +38,8 @@ Rest 1 minute</string>
                     </items>
                     <edgeInsets key="margins" left="0.0" right="0.0" top="0.0" bottom="0.0"/>
                     <connections>
+                        <outlet property="bodyGroup" destination="XrQ-4p-ZnE" id="0Nn-hg-Uzf"/>
+                        <outlet property="titleGroup" destination="q2H-ot-TIX" id="94O-wP-FlN"/>
                         <outlet property="wodBody" destination="0EF-JX-RhM" id="Mi3-9j-Zim"/>
                         <outlet property="wodTitle" destination="NBw-VO-moP" id="1ot-64-m4C"/>
                     </connections>
