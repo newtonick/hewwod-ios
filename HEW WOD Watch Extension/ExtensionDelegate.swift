@@ -10,6 +10,8 @@ import WatchKit
 
 class ExtensionDelegate: NSObject, WKExtensionDelegate {
 
+    static var pendingUpdateAlert:Bool = false
+    
     func applicationDidFinishLaunching() {
         // Perform any final initialization of your application.
     }

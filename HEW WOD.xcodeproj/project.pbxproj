@@ -7,14 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		540B57EA21EE6C6E00E6069D /* Workout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5477B16221B6D1C000C2153C /* Workout.swift */; };
+		540B57EC21EE6D0300E6069D /* WorkoutController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 540B57EB21EE6D0300E6069D /* WorkoutController.swift */; };
+		540B57ED21EE6D0300E6069D /* WorkoutController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 540B57EB21EE6D0300E6069D /* WorkoutController.swift */; };
 		541D2EDC21E7D6B800C68E0F /* ComplicationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 541D2EDB21E7D6B800C68E0F /* ComplicationController.swift */; };
 		5435232F21B71847009C98E7 /* SwiftyJsonExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5435232E21B71847009C98E7 /* SwiftyJsonExtension.swift */; };
 		5437A3BB21BC525400533CFC /* NKMarkupParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 5437A3B921BC525400533CFC /* NKMarkupParser.m */; };
 		54422A9421B1E54500DB923D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54422A9321B1E54500DB923D /* AppDelegate.swift */; };
 		54422A9B21B1E54700DB923D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 54422A9A21B1E54700DB923D /* Assets.xcassets */; };
 		54422A9E21B1E54700DB923D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 54422A9C21B1E54700DB923D /* LaunchScreen.storyboard */; };
-		5459DAC321E6A1A200DD2B61 /* SwiftyJSON.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5459DAC021E6A17C00DD2B61 /* SwiftyJSON.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		5459DAC521E6F16700DD2B61 /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5459DAC021E6A17C00DD2B61 /* SwiftyJSON.framework */; };
 		5477B15D21B6CBD200C2153C /* WorkoutTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5477B15C21B6CBD200C2153C /* WorkoutTableViewCell.swift */; };
 		5477B16121B6D11700C2153C /* WorkoutsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5477B16021B6D11700C2153C /* WorkoutsTableViewController.swift */; };
 		5477B16321B6D1C000C2153C /* Workout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5477B16221B6D1C000C2153C /* Workout.swift */; };
@@ -32,10 +33,6 @@
 		54C8AC4B21E545B0004BD138 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 54C8AC4A21E545B0004BD138 /* Assets.xcassets */; };
 		54C8AC5021E545B0004BD138 /* HEW WOD Watch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 54C8AC3321E545AC004BD138 /* HEW WOD Watch.app */; };
 		54D6FBE021E64F8900425717 /* NKMarkupParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 5437A3B921BC525400533CFC /* NKMarkupParser.m */; };
-		54ECD53B21C5B8C600B27F7B /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54ECD53A21C5B8C600B27F7B /* Alamofire.framework */; };
-		54ECD53D21C5B8CE00B27F7B /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54ECD53C21C5B8CE00B27F7B /* SwiftyJSON.framework */; };
-		54ECD53E21C5B9CC00B27F7B /* Alamofire.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 54ECD53A21C5B8C600B27F7B /* Alamofire.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		54ECD53F21C5B9D200B27F7B /* SwiftyJSON.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 54ECD53C21C5B8CE00B27F7B /* SwiftyJSON.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,29 +53,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		5477B15B21B6BFC200C2153C /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				54ECD53F21C5B9D200B27F7B /* SwiftyJSON.framework in Embed Frameworks */,
-				54ECD53E21C5B9CC00B27F7B /* Alamofire.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		549FB9EB21E69C6600F7056F /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				5459DAC321E6A1A200DD2B61 /* SwiftyJSON.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		54C8AC5621E545B0004BD138 /* Embed App Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -104,7 +78,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		540B57EB21EE6D0300E6069D /* WorkoutController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutController.swift; sourceTree = "<group>"; };
 		541D2EDB21E7D6B800C68E0F /* ComplicationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComplicationController.swift; sourceTree = "<group>"; };
+		541D2EDD21E7E1D100C68E0F /* WatchConnectivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WatchConnectivity.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS5.1.sdk/System/Library/Frameworks/WatchConnectivity.framework; sourceTree = DEVELOPER_DIR; };
 		5435232E21B71847009C98E7 /* SwiftyJsonExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SwiftyJsonExtension.swift; path = Source/SwiftyJsonExtension.swift; sourceTree = SOURCE_ROOT; };
 		5437A3AA21BC525400533CFC /* HEW WOD-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "HEW WOD-Bridging-Header.h"; sourceTree = "<group>"; };
 		5437A3B921BC525400533CFC /* NKMarkupParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NKMarkupParser.m; sourceTree = "<group>"; };
@@ -144,8 +120,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				54ECD53D21C5B8CE00B27F7B /* SwiftyJSON.framework in Frameworks */,
-				54ECD53B21C5B8C600B27F7B /* Alamofire.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -160,7 +134,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5459DAC521E6F16700DD2B61 /* SwiftyJSON.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -200,6 +173,7 @@
 				5482BE5A21C0595700D011A4 /* SettingsTableViewController.swift */,
 				5435232E21B71847009C98E7 /* SwiftyJsonExtension.swift */,
 				5477B16221B6D1C000C2153C /* Workout.swift */,
+				540B57EB21EE6D0300E6069D /* WorkoutController.swift */,
 				5477B16021B6D11700C2153C /* WorkoutsTableViewController.swift */,
 				5477B15C21B6CBD200C2153C /* WorkoutTableViewCell.swift */,
 			);
@@ -247,6 +221,7 @@
 		54ECD54021C5BA2F00B27F7B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				541D2EDD21E7E1D100C68E0F /* WatchConnectivity.framework */,
 				5459DAC021E6A17C00DD2B61 /* SwiftyJSON.framework */,
 				54ECD53A21C5B8C600B27F7B /* Alamofire.framework */,
 				54ECD53C21C5B8CE00B27F7B /* SwiftyJSON.framework */,
@@ -264,7 +239,6 @@
 				54422A8C21B1E54500DB923D /* Sources */,
 				54422A8D21B1E54500DB923D /* Frameworks */,
 				54422A8E21B1E54500DB923D /* Resources */,
-				5477B15B21B6BFC200C2153C /* Embed Frameworks */,
 				54C8AC5821E545B0004BD138 /* Embed Watch Content */,
 				5459DAC421E6F02600DD2B61 /* ShellScript */,
 			);
@@ -303,7 +277,6 @@
 				54C8AC3B21E545B0004BD138 /* Sources */,
 				54C8AC3C21E545B0004BD138 /* Frameworks */,
 				54C8AC3D21E545B0004BD138 /* Resources */,
-				549FB9EB21E69C6600F7056F /* Embed Frameworks */,
 				5459DAC621E77D1600DD2B61 /* ShellScript */,
 			);
 			buildRules = (
@@ -446,6 +419,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5437A3BB21BC525400533CFC /* NKMarkupParser.m in Sources */,
+				540B57EC21EE6D0300E6069D /* WorkoutController.swift in Sources */,
 				5477B15D21B6CBD200C2153C /* WorkoutTableViewCell.swift in Sources */,
 				54422A9421B1E54500DB923D /* AppDelegate.swift in Sources */,
 				54BD2E4721BB21DA005D6C07 /* NSAttributedStringExtension.swift in Sources */,
@@ -464,7 +438,9 @@
 				54D6FBE021E64F8900425717 /* NKMarkupParser.m in Sources */,
 				541D2EDC21E7D6B800C68E0F /* ComplicationController.swift in Sources */,
 				54C8AC4721E545B0004BD138 /* ExtensionDelegate.swift in Sources */,
+				540B57ED21EE6D0300E6069D /* WorkoutController.swift in Sources */,
 				54C8AC4521E545B0004BD138 /* InterfaceController.swift in Sources */,
+				540B57EA21EE6C6E00E6069D /* Workout.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -622,7 +598,6 @@
 		54422AA321B1E54700DB923D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = "./Misc/HEW WOD.entitlements";
@@ -650,7 +625,6 @@
 		54422AA421B1E54700DB923D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = "./Misc/HEW WOD.entitlements";

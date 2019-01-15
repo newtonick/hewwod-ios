@@ -29,7 +29,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         
         AppDelegate.backgroundFetchComplete = false
-        UIApplication.shared.setMinimumBackgroundFetchInterval(TimeInterval(exactly: 10800.00)!) //3 Hours
+        UIApplication.shared.setMinimumBackgroundFetchInterval(TimeInterval(exactly: 21600.00)!) //6 Hours
         
         registerForPushNotifications()
         return true

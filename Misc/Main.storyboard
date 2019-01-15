@@ -232,6 +232,24 @@ Notifications only work from 4:30 AM to 8 PM</string>
                                     </tableViewCell>
                                 </cells>
                             </tableViewSection>
+                            <tableViewSection headerTitle="Time Zone" id="MxW-1E-iLi">
+                                <cells>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" shouldIndentWhileEditing="NO" rowHeight="120" id="cWI-SU-CaC">
+                                        <rect key="frame" x="0.0" y="431.5" width="320" height="120"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="cWI-SU-CaC" id="rdj-AS-bhI">
+                                            <rect key="frame" x="0.0" y="0.0" width="320" height="119.5"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <pickerView contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nnY-pL-wMI">
+                                                    <rect key="frame" x="16" y="11" width="288" height="98"/>
+                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                                                </pickerView>
+                                            </subviews>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </cells>
+                            </tableViewSection>
                         </sections>
                         <connections>
                             <outlet property="dataSource" destination="ghH-28-lHk" id="fMn-iQ-YoI"/>
@@ -250,6 +268,7 @@ Notifications only work from 4:30 AM to 8 PM</string>
                         <outlet property="dailyWODReminderSwitch" destination="uz0-27-3aa" id="wc3-Rm-hYi"/>
                         <outlet property="dailyWODTimePicker" destination="HWO-4W-HbE" id="1z5-Tl-ydy"/>
                         <outlet property="notificationsSwitch" destination="Yof-eY-9Id" id="WmN-b8-Q6N"/>
+                        <outlet property="timezonePicker" destination="nnY-pL-wMI" id="43r-hM-Kne"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="mpZ-2a-rfs" userLabel="First Responder" sceneMemberID="firstResponder"/>

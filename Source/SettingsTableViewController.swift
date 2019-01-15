@@ -11,15 +11,22 @@ import UserNotifications
 import os.log
 import Alamofire
 
-class SettingsTableViewController: UITableViewController {
+class SettingsTableViewController: UITableViewController, UIPickerViewDataSource, UIPickerViewDelegate {
 
     @IBOutlet weak var notificationsSwitch: UISwitch!
     @IBOutlet weak var dailyWODReminderSwitch: UISwitch!
     @IBOutlet weak var dailyWODTimePicker: UIDatePicker!
+    @IBOutlet weak var timezonePicker: UIPickerView!
+    
+    var timezonePickerDataSource = ["America/New_York", "America/Chicago", "America/Denver", "America/Los_Angeles", "Pacific/Honolulu"];
+    
+    var curTimeZone:String = "America/New_York"
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        print(Calendar.current.timeZone.identifier)
+        
         /****************************
          * Defaults for UI Elements *
          ****************************/
@@ -28,6 +35,11 @@ class SettingsTableViewController: UITableViewController {
         self.dailyWODReminderSwitch.isOn = true
         self.dailyWODReminderSwitch.isEnabled = false
         self.dailyWODTimePicker.isEnabled = false
+        self.timezonePicker.isUserInteractionEnabled = false
+        self.timezonePicker.alpha = 0.6
+
+        self.timezonePicker.dataSource = self;
+        self.timezonePicker.delegate = self;
 
         /****************************
          * Values from settings     *
@@ -40,6 +52,15 @@ class SettingsTableViewController: UITableViewController {
             self.dailyWODTimePicker.setDate(UserDefaults.standard.object(forKey: "todaysNotifyTime") as! Date, animated: false)
         }
         
+        if UserDefaults.standard.object(forKey: "timeZone") != nil {
+            self.curTimeZone = UserDefaults.standard.object(forKey: "timeZone") as! String
+        } else {
+            if self.timezonePickerDataSource.firstIndex(of:Calendar.current.timeZone.identifier) != nil {
+                self.curTimeZone = Calendar.current.timeZone.identifier
+            }
+        }
+        self.timezonePicker.selectRow(self.timezonePickerDataSource.firstIndex(of: self.curTimeZone)!, inComponent: 0, animated: false)
+
         if UserDefaults.standard.object(forKey: "todaysWODSwitch") != nil {
             self.dailyWODReminderSwitch.isOn = UserDefaults.standard.bool(forKey: "todaysWODSwitch")
         } else {
@@ -50,9 +71,18 @@ class SettingsTableViewController: UITableViewController {
         
         if self.notificationsSwitch.isOn {
             self.dailyWODReminderSwitch.isEnabled = true
-            self.dailyWODTimePicker.isEnabled = true
         }
         
+        if self.dailyWODReminderSwitch.isOn {
+            self.dailyWODTimePicker.isEnabled = true
+            self.timezonePicker.isUserInteractionEnabled = true
+            self.timezonePicker.alpha = 1
+        } else {
+            self.dailyWODTimePicker.isEnabled = false
+            self.timezonePicker.isUserInteractionEnabled = false
+            self.timezonePicker.alpha = 0.6
+        }
+
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
@@ -98,8 +128,9 @@ class SettingsTableViewController: UITableViewController {
                         
                         DispatchQueue.main.async {
                             self.notificationsSwitch?.isOn = false
-                            self.dailyWODReminderSwitch.isEnabled = false
                             self.dailyWODTimePicker.isEnabled = false
+                            //self.timezonePicker.isUserInteractionEnabled = false
+                            //self.timezonePicker.alpha = 0.6
                             UserDefaults.standard.set(false, forKey: "notificationsOnSwitch")
                             UserDefaults.standard.synchronize()
                         }
@@ -107,7 +138,11 @@ class SettingsTableViewController: UITableViewController {
                 
                 DispatchQueue.main.async {
                     self.dailyWODReminderSwitch.isEnabled = true
-                    self.dailyWODTimePicker.isEnabled = true
+                    if self.dailyWODReminderSwitch.isOn {
+                        self.dailyWODTimePicker.isEnabled = true
+                        self.timezonePicker.isUserInteractionEnabled = true
+                        self.timezonePicker.alpha = 1
+                    }
                     UserDefaults.standard.set(true, forKey: "notificationsOnSwitch")
                     UserDefaults.standard.synchronize()
                     AppDelegate.getNotificationSettings()
@@ -118,6 +153,8 @@ class SettingsTableViewController: UITableViewController {
             //todo: let api know to not send push notifications
             self.dailyWODReminderSwitch.isEnabled = false
             self.dailyWODTimePicker.isEnabled = false
+            self.timezonePicker.isUserInteractionEnabled = false
+            self.timezonePicker.alpha = 0.6
             UserDefaults.standard.set(false, forKey: "notificationsOnSwitch")
             UserDefaults.standard.synchronize()
         }
@@ -126,8 +163,14 @@ class SettingsTableViewController: UITableViewController {
     @IBAction func dailyWODReminderSwitch(_ sender: UISwitch) {
         if sender.isOn {
             UserDefaults.standard.set(true, forKey: "todaysWODSwitch")
+            self.dailyWODTimePicker.isEnabled = true
+            self.timezonePicker.isUserInteractionEnabled = true
+            self.timezonePicker.alpha = 1
         } else {
             UserDefaults.standard.set(false, forKey: "todaysWODSwitch")
+            self.dailyWODTimePicker.isEnabled = false
+            self.timezonePicker.isUserInteractionEnabled = false
+            self.timezonePicker.alpha = 0.6
         }
         UserDefaults.standard.synchronize()
     }
@@ -146,10 +189,30 @@ class SettingsTableViewController: UITableViewController {
         let wod:Bool = self.dailyWODReminderSwitch?.isOn ?? false
         let wodhour:Int = calendar.component(.hour, from: self.dailyWODTimePicker.date)
         let wodminute:Int = calendar.component(.minute, from: self.dailyWODTimePicker.date)
+        let timezone:String = self.curTimeZone
         
-        let url = "https://hew.klck.in/api/1.0/device/settings?uuid=\(uuid)&token=\(token)&noti=\(noti)&wod=\(wod)&wodhour=\(wodhour)&wodminute=\(wodminute)"
+        let url = "https://hew.klck.in/api/1.0/device/settings?uuid=\(uuid)&token=\(token)&noti=\(noti)&wod=\(wod)&wodhour=\(wodhour)&wodminute=\(wodminute)&timezone=\(timezone)"
         
         Alamofire.request(url)
+    }
+    
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return self.timezonePickerDataSource.count;
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, attributedTitleForRow row: Int, forComponent component: Int) -> NSAttributedString? {
+        return NSAttributedString.init(string: self.timezonePickerDataSource[row])
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        self.curTimeZone = self.timezonePickerDataSource[row]
+        print(self.curTimeZone)
+        UserDefaults.standard.set(self.curTimeZone, forKey: "timeZone")
+        UserDefaults.standard.synchronize()
     }
 
 }

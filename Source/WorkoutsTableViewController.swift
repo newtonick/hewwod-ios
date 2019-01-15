@@ -175,7 +175,9 @@ class WorkoutsTableViewController: UITableViewController {
                 self.workouts = self.webWorkouts
                 AppDelegate.saveToArchive(workouts: self.workouts)
                 //self.tableView.reloadSections(IndexSet([0]), with: .bottom)
-                self.tableView.reloadData()
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
                 return
             }
             
@@ -192,7 +194,9 @@ class WorkoutsTableViewController: UITableViewController {
                     self.workouts = self.webWorkouts
                     AppDelegate.saveToArchive(workouts: self.workouts)
                     //self.tableView.reloadSections(IndexSet([0]), with: .bottom)
-                    self.tableView.reloadData()
+                    DispatchQueue.main.async {
+                        self.tableView.reloadData()
+                    }
                     return
                 }
                 match = false
@@ -204,14 +208,18 @@ class WorkoutsTableViewController: UITableViewController {
             os_log("Archive Load Complete", log: OSLog.default, type: .debug)
             self.workouts = self.archiveWorkouts
             //self.tableView.reloadSections(IndexSet([0]), with: .bottom)
-            self.tableView.reloadData()
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
         }
         else if self.webLoadComplete == true {
             os_log("Web Load Complete", log: OSLog.default, type: .debug)
             self.workouts = self.webWorkouts
             AppDelegate.saveToArchive(workouts: self.workouts)
             //self.tableView.reloadSections(IndexSet([0]), with: .bottom)
-            self.tableView.reloadData()
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
         }
     }
 }
