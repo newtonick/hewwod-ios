@@ -56,7 +56,7 @@ class WorkoutsTableViewController: UITableViewController {
         self.tableView.setContentOffset(.zero, animated: false)
         self.appDelegate.workoutController.fetchWorksoutFromWeb(completion: { workouts in
             self.refreshTable()
-        })
+        }, failure: {})
     }
     
     @objc func enableRefresh() {
@@ -144,7 +144,7 @@ class WorkoutsTableViewController: UITableViewController {
                 }
                 self.appDelegate.workoutController.saveWorkoutsToUserDefaults()
                 self.appDelegate.working = false
-            })
+            }, failure: {})
         })
     }
     

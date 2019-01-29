@@ -130,7 +130,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             AppDelegate.backgroundFetch = false
             AppDelegate.backgroundFetchComplete = true
             completionHandler(UIBackgroundFetchResult.newData)
-        })
+        }, failure: {})
     }
     
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
@@ -138,7 +138,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.workoutController.fetchWorksoutFromWeb(completion: { workouts in
             self.workoutController.saveWorkoutsToUserDefaults()
             completionHandler(UIBackgroundFetchResult.newData)
-        })
+        }, failure: {})
     }
     
     static func getDeviceSettings() {

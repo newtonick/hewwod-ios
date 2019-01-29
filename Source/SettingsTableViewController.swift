@@ -26,8 +26,6 @@ class SettingsTableViewController: UITableViewController, UIPickerViewDataSource
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        print(Calendar.current.timeZone.identifier)
         
         /****************************
          * Defaults for UI Elements *

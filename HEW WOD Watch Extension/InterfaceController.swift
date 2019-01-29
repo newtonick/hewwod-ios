@@ -8,6 +8,7 @@
 
 import WatchKit
 import Foundation
+import os.log
 
 class InterfaceController: WKInterfaceController {
 
@@ -31,7 +32,7 @@ class InterfaceController: WKInterfaceController {
     override func awake(withContext context: Any?) {
         super.awake(withContext: context)
         
-        print("awake")
+        os_log("WKInterfaceController Awake called", log: OSLog.default, type: .debug)
         loadWorkout()
     }
     
@@ -69,8 +70,11 @@ class InterfaceController: WKInterfaceController {
                                        .withTime,
                                        .withDashSeparatorInDate,
                                        .withColonSeparatorInTime]
-
-        if Calendar.current.isDateInToday((self.workoutController.latestWorkout?.date)!) {
+        
+        var calendar = Calendar.current
+        calendar.timeZone = TimeZone.current
+        
+        if calendar.isDateInToday((self.workoutController.latestWorkout?.date)!) {
             self.wodTitle.setText(self.workoutController.latestWorkout?.name)
             self.wodTitle.setHorizontalAlignment(.center)
 
@@ -90,13 +94,47 @@ class InterfaceController: WKInterfaceController {
             self.loadingLabel.setHidden(true)
             self.forceUpdateGroup.setHidden(false)
         }
+        else {
+            var calendar = Calendar.current
+            calendar.timeZone = TimeZone.current
+            
+            let components = calendar.dateComponents([.weekday], from: Date())
+            
+            if components.weekday == 3 { //Sunday
+                self.wodTitle.setText("No Workout Sunday")
+                self.wodTitle.setHorizontalAlignment(.center)
+                
+                let style = NSMutableParagraphStyle()
+                style.alignment = NSTextAlignment.center
+                
+                let attrText:NSAttributedString = NKMarkupParser.attributedString(fromMarkup: "\n\n\n",
+                                                                                  font: UIFont(name: "Helvetica", size: 11.5),
+                                                                                  color: UIColor.white,
+                                                                                  paragraphStyle: style)
+                
+                self.wodBody.setAttributedText(attrText)
+                self.wodBody.setHorizontalAlignment(.center)
+                self.workoutDate = self.workoutController.latestWorkout?.date
+                
+                self.mainGroup.setHidden(false)
+                self.loadingLabel.setHidden(true)
+                self.forceUpdateGroup.setHidden(false)
+                
+            } else {
+                self.forceUpdateGroup.setHidden(false)
+                self.mainGroup.setHidden(true)
+                self.loadingLabel.setHidden(false)
+                self.loadingLabel.setText("No Workout\ntry again later")
+                self.loadingLabel.setHorizontalAlignment(.center)
+            }
+        }
     }
     
     override func willActivate() {
         // This method is called when watch view controller is about to be visible to user
         super.willActivate()
         
-        print("willActivate")
+        os_log("WKInterfaceController willActivate called", log: OSLog.default, type: .debug)
         
         if self.working == false && self.workoutController.latestWorkoutUpdated.addingTimeInterval(300) < Date() {
             self.loadWorkout()
@@ -106,14 +144,14 @@ class InterfaceController: WKInterfaceController {
     override func didAppear() {
         super.didAppear()
 
-        print("didAppear")
+        os_log("WKInterfaceController didAppear called", log: OSLog.default, type: .debug)
     }
     
     override func didDeactivate() {
         // This method is called when watch view controller is no longer visible
         super.didDeactivate()
         
-        print("didDeactivate")
+        os_log("WKInterfaceController didDeactivate called", log: OSLog.default, type: .debug)
         
         self.scroll(to: self.titleGroup, at: .top, animated: false)
     }

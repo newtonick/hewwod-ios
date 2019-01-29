@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import os.log
 
 class WorkoutController : NSObject {
     
@@ -16,23 +17,26 @@ class WorkoutController : NSObject {
     var workoutsUpdated = Date()
     var latestWorkoutUpdated = Date()
 
-    func fetchWorksoutFromWeb(completion: @escaping ([Workout]) -> Void){
-        print("fetchWorksoutFromWeb")
+    func fetchWorksoutFromWeb(completion: @escaping ([Workout]) -> Void, failure: @escaping () ->Void){
+        os_log("WorkoutController fetchWorksoutFromWeb called", log: OSLog.default, type: .debug)
         var request = URLRequest(url: URL(string:"https://hew.klck.in/api/1.0/workouts")!)
         request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
         let task = URLSession.shared.dataTask(with: request) {(data, response, error ) in
             guard error == nil else {
-                print("fetchWorksoutFromWeb url call to /api/1.0/workouts failed")
+                os_log("WorkoutController fetchWorksoutFromWeb url call to /api/1.0/workouts failed", log: OSLog.default, type: .debug)
+                failure()
                 return
             }
             
             guard let content = data else {
-                print("fetchWorksoutFromWeb url call to /api/1.0/workout has no data")
+                os_log("WorkoutController fetchWorksoutFromWeb url call to /api/1.0/workout has no data", log: OSLog.default, type: .debug)
+                failure()
                 return
             }
             
             guard let json = (try? JSONSerialization.jsonObject(with: content, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] else {
-                print("fetchWorksoutFromWeb url call to /api/1.0/workout does not have valid JSON")
+                os_log("WorkoutController fetchWorksoutFromWeb url call to /api/1.0/workout does not have valid JSON", log: OSLog.default, type: .debug)
+                failure()
                 return
             }
             
@@ -51,6 +55,7 @@ class WorkoutController : NSObject {
                     
                     // calls completion callback function and passes workout array with optionals removed
                     completion(self.workouts.compactMap{$0})
+                    os_log("WorkoutControllerfetch WorksoutFromWeb complete", log: OSLog.default, type: .debug)
                 }
             }
         }
@@ -58,27 +63,28 @@ class WorkoutController : NSObject {
     }
         
     func fetchLatestWorkoutFromWeb(completion: @escaping (Workout) -> Void, failure: @escaping () ->Void) {
-        print("fetchLatestWorkoutFromWeb")
+        os_log("WorkoutController fetchLatestWorkoutFromWeb called", log: OSLog.default, type: .debug)
         var request = URLRequest(url: URL(string:"https://hew.klck.in/api/1.0/workout")!)
         request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
         let sessionConfig = URLSessionConfiguration.default
         sessionConfig.timeoutIntervalForRequest = 10.0
+        sessionConfig.timeoutIntervalForResource = 10.0
         let session = URLSession(configuration: sessionConfig)
         let task = session.dataTask(with: request) {(data, response, error ) in
             guard error == nil else {
-                print("fetchWorksoutFromWeb url call to /api/1.0/workouts failed")
+                os_log("WorkoutController fetchLatestWorkoutFromWeb url call to /api/1.0/workouts failed", log: OSLog.default, type: .debug)
                 failure()
                 return
             }
             
             guard let content = data else {
-                print("fetchWorksoutFromWeb url call to /api/1.0/workout has no data")
+                os_log("WorkoutController fetchLatestWorkoutFromWeb url call to /api/1.0/workout has no data", log: OSLog.default, type: .debug)
                 failure()
                 return
             }
             
             guard let json = (try? JSONSerialization.jsonObject(with: content, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] else {
-                print("fetchWorksoutFromWeb url call to /api/1.0/workout does not have valid JSON")
+                os_log("WorkoutController fetchLatestWorkoutFromWeb url call to /api/1.0/workout does not have valid JSON", log: OSLog.default, type: .debug)
                 failure()
                 return
             }
@@ -90,6 +96,7 @@ class WorkoutController : NSObject {
                     //load latest workout from json
                     self.latestWorkout = Workout(json: w)
                     completion(self.latestWorkout!)
+                    os_log("WorkoutController fetchLatestWorkoutFromWeb complete", log: OSLog.default, type: .debug)
                 }
             }
         }
@@ -97,6 +104,7 @@ class WorkoutController : NSObject {
     }
     
     func saveWorkoutsToUserDefaults() {
+        os_log("WorkoutController saveWorkoutsToUserDefaults called", log: OSLog.default, type: .debug)
         let encodedData = try! JSONEncoder().encode(self.workouts)
         UserDefaults.standard.set(encodedData, forKey: "workouts")
         UserDefaults.standard.synchronize()
@@ -104,6 +112,7 @@ class WorkoutController : NSObject {
     }
     
     func fetchWorkoutsFromUserDefaults(completion: @escaping ([Workout?]) -> Void) {
+        os_log("WorkoutController fetchWorkoutsFromUserDefaults called", log: OSLog.default, type: .debug)
         let encodedData = UserDefaults.standard.data(forKey: "workouts") ?? Data()
         if encodedData.isEmpty { completion([Workout]()); return }
         let workouts = try! JSONDecoder().decode([Workout?].self, from: encodedData)
@@ -112,14 +121,15 @@ class WorkoutController : NSObject {
     }
     
     func saveLatestWorkoutToUserDefault() {
+        os_log("WorkoutController saveLatestWorkoutToUserDefault called", log: OSLog.default, type: .debug)
         let encodedData = try! JSONEncoder().encode(self.latestWorkout)
         UserDefaults.standard.set(encodedData, forKey: "latest-workout")
         UserDefaults.standard.synchronize()
         self.latestWorkoutUpdated = Date()
-        print(self.latestWorkoutUpdated)
     }
     
     func fetchLatestWorkoutFromUserDefault(completion: @escaping (Workout?) -> Void) {
+        os_log("WorkoutController fetchLatestWorkoutFromUserDefault called", log: OSLog.default, type: .debug)
         let encodedData = UserDefaults.standard.data(forKey: "latest-workout") ?? Data()
         if encodedData.isEmpty { completion(Workout()); return }
         let latestWorkout = try! JSONDecoder().decode(Workout.self, from: encodedData)
@@ -132,9 +142,7 @@ class WorkoutController : NSObject {
         dateFormatter.dateStyle = .medium
         dateFormatter.timeStyle = .none
         dateFormatter.locale = Locale(identifier: "en_US")
-        
-        print(self.localDateString(date: (self.latestWorkout?.date) ?? Date().addingTimeInterval(-86400)))
-        
+
         if self.localDateString(date: (self.latestWorkout?.date) ?? Date().addingTimeInterval(-86400)) == self.localDateString(date: Date()) {
             return true
         }
@@ -146,7 +154,6 @@ class WorkoutController : NSObject {
         let dateFormatter = DateFormatter()
         dateFormatter.timeZone = TimeZone.current
         dateFormatter.dateFormat = "yyyyMMdd"
-        dateFormatter.string(from: date)
         
         return dateFormatter.string(from: date)
     }
