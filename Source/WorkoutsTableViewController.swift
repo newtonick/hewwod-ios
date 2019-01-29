@@ -8,18 +8,13 @@
 
 import UIKit
 import os.log
-import Alamofire
-import SwiftyJSON
 
 class WorkoutsTableViewController: UITableViewController {
     
     @IBOutlet weak var settingsNavButton: UIBarButtonItem!
     @IBOutlet weak var refreshNavButton: UIBarButtonItem!
-    var workouts = [Workout]()
-    var webWorkouts = [Workout]()
-    var archiveWorkouts = [Workout]()
-    var webLoadComplete:Bool = false
-    var archiveLoadComplete:Bool = false
+    
+    let appDelegate:AppDelegate = UIApplication.shared.delegate as! AppDelegate
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,10 +40,10 @@ class WorkoutsTableViewController: UITableViewController {
         self.navigationController?.navigationBar.layer.shadowOffset = CGSize(width: 0, height: 2.0)
         self.navigationController?.navigationBar.layer.shadowRadius = 2
         
-        // loads the archived and pulls down the web updates
-        self.loadWorkouts()
+        self.appDelegate.workoutsTableViewController = self
         
-        AppDelegate.workoutTableViewController = self
+        // loads the userdefaults and pulls down the web updates
+        self.loadWorkouts()
         
         os_log("WorkoutsTableViewController viewDidLoad is Complete", log: OSLog.default, type: .debug)
     }
@@ -59,7 +54,9 @@ class WorkoutsTableViewController: UITableViewController {
         self.refreshNavButton.isEnabled = false;
         Timer.scheduledTimer(timeInterval: 5, target: self, selector: #selector(enableRefresh), userInfo: nil, repeats: false)
         self.tableView.setContentOffset(.zero, animated: false)
-        self.fetchWorkoutsFromWeb()
+        self.appDelegate.workoutController.fetchWorksoutFromWeb(completion: { workouts in
+            self.refreshTable()
+        })
     }
     
     @objc func enableRefresh() {
@@ -75,11 +72,11 @@ class WorkoutsTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return workouts.count
+        return self.appDelegate.workoutController.workouts.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        os_log("loading tableView Cell: %@", log: OSLog.default, type: .debug, self.workouts[indexPath.row].name)
+        os_log("loading tableView Cell: %@", log: OSLog.default, type: .debug, self.appDelegate.workoutController.workouts[indexPath.row]!.name)
         let cellIdentifier = "WorkoutTableViewCell"
         
         guard let cell = self.tableView.dequeueReusableCell(withIdentifier: cellIdentifier) as? WorkoutTableViewCell else {
@@ -87,10 +84,10 @@ class WorkoutsTableViewController: UITableViewController {
         }
         
         //set cell values
-        cell.workoutName.text = self.workouts[indexPath.row].name
-        cell.workoutText.text = self.workouts[indexPath.row].text
-        cell.workoutDate.text = self.workouts[indexPath.row].getDateString()
-        cell.workoutText.attributedText = self.workouts[indexPath.row].attributedText
+        cell.workoutName.text = self.appDelegate.workoutController.workouts[indexPath.row]?.name
+        cell.workoutText.text = self.appDelegate.workoutController.workouts[indexPath.row]?.text
+        cell.workoutDate.text = self.appDelegate.workoutController.workouts[indexPath.row]?.getDateString()
+        cell.workoutText.attributedText = self.appDelegate.workoutController.workouts[indexPath.row]?.attributedText
         
         if cell.workoutDate.text == "Today" {
             cell.nameBar.backgroundColor = UIColor(red:0.20, green:0.20, blue:0.20, alpha:1.00)
@@ -105,8 +102,6 @@ class WorkoutsTableViewController: UITableViewController {
         cell.layer.shadowOffset = CGSize(width: 0, height: 2.0)
         cell.layer.shadowRadius = 2
         
-        //cell.layoutSubviews()
-        
         return cell
     }
 
@@ -115,7 +110,7 @@ class WorkoutsTableViewController: UITableViewController {
         let screenWidth = UIScreen.main.bounds.width
         
         let cgsize = CGSize(width: screenWidth - 46, height: 10000)
-        let rect = self.workouts[indexPath.row].attributedText.boundingRect(with: cgsize, options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
+        let rect = self.appDelegate.workoutController.workouts[indexPath.row]!.attributedText.boundingRect(with: cgsize, options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
 
         os_log("Height tableView Cell: %@", log: OSLog.default, type: .debug, rect.height.description)
         
@@ -140,86 +135,22 @@ class WorkoutsTableViewController: UITableViewController {
     }
 
     func loadWorkouts() {
-        self.fetchWorkoutsFromArchive()
-        self.fetchWorkoutsFromWeb()
-    }
-    
-    private func fetchWorkoutsFromWeb() {
-        AppDelegate.fetchWorksouts(completion: { workouts in
-            self.webWorkouts = workouts
-            if self.webWorkouts.count > 0 {
-                self.webLoadComplete = true
-            }
-            self.fetchWorkoutsComplete()
+        self.appDelegate.working = true
+        self.appDelegate.workoutController.fetchWorkoutsFromUserDefaults(completion: { workouts in
+            let defaultsWorkouts = workouts
+            self.appDelegate.workoutController.fetchWorksoutFromWeb(completion: { workouts in
+                if defaultsWorkouts.count != workouts.count || defaultsWorkouts[0]?.updated != workouts[0].updated {
+                    self.refreshTable()
+                }
+                self.appDelegate.workoutController.saveWorkoutsToUserDefaults()
+                self.appDelegate.working = false
+            })
         })
     }
     
-    func fetchWorkoutsFromArchive() {
-        self.archiveWorkouts = AppDelegate.fetchFromArchive()
-    
-        if self.archiveWorkouts.count > 0 {
-            self.archiveLoadComplete = true
-        }
-        self.fetchWorkoutsComplete()
-    }
-    
-    private func fetchWorkoutsComplete() {
-        // compare archive to web if both are complete
-        if self.webLoadComplete == true && self.archiveLoadComplete == true {
-            os_log("Web Load and Archive Load Complete", log: OSLog.default, type: .debug)
-            // compare of both complete
-            var match:Bool = false
-            
-            if self.webWorkouts.count != self.archiveWorkouts.count {
-                os_log("Web and Archive Counts Different, Loading from Web, Reloading Table, and Saving", log: OSLog.default, type: .debug)
-                self.workouts = self.webWorkouts
-                AppDelegate.saveToArchive(workouts: self.workouts)
-                //self.tableView.reloadSections(IndexSet([0]), with: .bottom)
-                DispatchQueue.main.async {
-                    self.tableView.reloadData()
-                }
-                return
-            }
-            
-            // loop over each workout in archive and web and compare id and date
-            for arcW in self.archiveWorkouts {
-                for webW in self.webWorkouts {
-                    if webW.id == arcW.id && webW.date == arcW.date && webW.updated == arcW.updated {
-                        match = true //set match to true when match is found
-                    }
-                }
-                if match == false {
-                    // when a match can't be found, web and archive are different. Load from Web and Save.
-                    os_log("Web and Archive Non Match Found, Loading from Web, Realoding Table, and Saving", log: OSLog.default, type: .debug)
-                    self.workouts = self.webWorkouts
-                    AppDelegate.saveToArchive(workouts: self.workouts)
-                    //self.tableView.reloadSections(IndexSet([0]), with: .bottom)
-                    DispatchQueue.main.async {
-                        self.tableView.reloadData()
-                    }
-                    return
-                }
-                match = false
-            }
-            self.webLoadComplete = false
-            self.archiveLoadComplete = false
-        }
-        else if self.archiveLoadComplete == true {
-            os_log("Archive Load Complete", log: OSLog.default, type: .debug)
-            self.workouts = self.archiveWorkouts
-            //self.tableView.reloadSections(IndexSet([0]), with: .bottom)
-            DispatchQueue.main.async {
-                self.tableView.reloadData()
-            }
-        }
-        else if self.webLoadComplete == true {
-            os_log("Web Load Complete", log: OSLog.default, type: .debug)
-            self.workouts = self.webWorkouts
-            AppDelegate.saveToArchive(workouts: self.workouts)
-            //self.tableView.reloadSections(IndexSet([0]), with: .bottom)
-            DispatchQueue.main.async {
-                self.tableView.reloadData()
-            }
+    private func refreshTable() {
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
         }
     }
 }

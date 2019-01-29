@@ -8,18 +8,19 @@
 
 import UIKit
 import UserNotifications
-import Alamofire
-import SwiftyJSON
 import os.log
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    var workoutController:WorkoutController = WorkoutController()
+    var working:Bool = false
+    var workoutsTableViewController:WorkoutsTableViewController?
+    
     static var backgroundFetch:Bool = false
     static var backgroundFetchComplete:Bool = false
-    static var workoutTableViewController:WorkoutsTableViewController?
-
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         if UserDefaults.standard.object(forKey: "uuid") == nil {
@@ -31,7 +32,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         AppDelegate.backgroundFetchComplete = false
         UIApplication.shared.setMinimumBackgroundFetchInterval(TimeInterval(exactly: 21600.00)!) //6 Hours
         
-        registerForPushNotifications()
+        registerForProvisionalPushNotifications()
+
         return true
     }
 
@@ -50,16 +52,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillEnterForeground(_ application: UIApplication) {
         // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
         os_log("applicationWillEnterForeground", log: OSLog.default, type: .debug)
+        if self.working == false && self.workoutController.workoutsUpdated.addingTimeInterval(900) < Date() {
+            self.workoutsTableViewController?.loadWorkouts()
+        }
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
         os_log("applicationDidBecomeActive", log: OSLog.default, type: .debug)
-        if AppDelegate.workoutTableViewController != nil && AppDelegate.backgroundFetchComplete {
-            AppDelegate.workoutTableViewController?.fetchWorkoutsFromArchive()
-            //AppDelegate.workoutTableViewController?.tableView.reloadData()
-        }
-        AppDelegate.backgroundFetchComplete = false
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
@@ -80,11 +80,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         os_log("Device Token %@", log: OSLog.default, type: .debug, token.description)
 
         //push token to api
-        var url = "https://hew.klck.in/api/1.0/device/add?token=\(token)&env=production&notifications=\(noti)"
+        var urlString = "https://hew.klck.in/api/1.0/device/add?token=\(token)&env=production&notifications=\(noti)"
         #if DEBUG
-        url = "https://hew.klck.in/api/1.0/device/add?token=\(token)&env=sandbox&notifications=\(noti)"
+        urlString = "https://hew.klck.in/api/1.0/device/add?token=\(token)&env=sandbox&notifications=\(noti)"
         #endif
-        Alamofire.request(url)
+        let url = URL(string: urlString)
+        let task = URLSession.shared.dataTask(with: url!)
+        task.resume()
+        UserDefaults.standard.set(UserDefaults.standard.integer(forKey: "add-token-count") + 1, forKey: "add-token-count")
+        //Alamofire.request(url)
     }
     
     func application(
@@ -93,11 +97,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         print("Failed to register: \(error)")
     }
     
-    func registerForPushNotifications() {
+    func registerForProvisionalPushNotifications() {
         if #available(iOS 12.0, *) {
             os_log("UNUserNotificationCenter iOS 12", log: OSLog.default, type: .debug)
             UNUserNotificationCenter.current()
-                .requestAuthorization(options: [.provisional]) { //[.alert, .sound]) {
+                .requestAuthorization(options: [.provisional]) {
                     granted, error in
                     
                     os_log("Permission granted: %@", log: OSLog.default, type: .debug, granted.description)
@@ -119,9 +123,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         os_log("performFetchWithCompletionHandler", log: OSLog.default, type: .debug)
+        UserDefaults.standard.set(UserDefaults.standard.integer(forKey: "background-fetch-count") + 1, forKey: "background-fetch-count")
         AppDelegate.backgroundFetch = true
-        AppDelegate.fetchWorksouts(completion: { workouts in
-            AppDelegate.saveToArchive(workouts: workouts)
+        self.workoutController.fetchWorksoutFromWeb(completion: { workouts in
+            self.workoutController.saveWorkoutsToUserDefaults()
             AppDelegate.backgroundFetch = false
             AppDelegate.backgroundFetchComplete = true
             completionHandler(UIBackgroundFetchResult.newData)
@@ -130,74 +135,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         os_log("didReceiveRemoteNotification", log: OSLog.default, type: .debug)
-        AppDelegate.fetchWorksouts(completion: { workouts in
-            AppDelegate.saveToArchive(workouts: workouts)
+        self.workoutController.fetchWorksoutFromWeb(completion: { workouts in
+            self.workoutController.saveWorkoutsToUserDefaults()
             completionHandler(UIBackgroundFetchResult.newData)
         })
     }
     
-    static func fetchWorksouts(completion: @escaping ([Workout]) -> Void ) {
-        var workouts = [Workout]()
-        
-        var queue:DispatchQueue = DispatchQueue.main
-        if AppDelegate.backgroundFetch == true {
-            queue = DispatchQueue(label: "com.klockenga.hewwod.bg", qos: .background, attributes: .concurrent)
-        }
-        
-        Alamofire.request("https://hew.klck.in/api/1.0/workouts").responseJSON(queue: queue) { response in
-            os_log("Alamofire workout fetch %@", log: OSLog.default, type: .debug, response.description)
-            switch response.result {
-            case .success:
-                let json = JSON(response.result.value!)
-                
-                if json["status"].exists() {
-                    if json["status"] == "success" {
-                        
-                        for(_,subJson):(String, JSON) in json["workouts"] {
-                            
-                            let w:Workout = Workout(id: subJson["_id"].string!, name: subJson["name"].string!,
-                                                    text: subJson["text"].string!,
-                                                    date: Workout.stringDateConverter(date: subJson["date"].string!),
-                                                    updated: Workout.stringDateConverter(date: subJson["updated"].string!))!
-                            
-                            workouts += [w]
-                        }
-                        completion(workouts)
-                    }
-                }
-            case .failure(let error):
-                os_log("Alamofire workouts fetch error: %@", log: OSLog.default, type: .error, error.localizedDescription)
-            }
-        }
-    }
-    
     static func getDeviceSettings() {
         let token = UserDefaults.standard.string(forKey: "token")
-        Alamofire.request("https://hew.klck.in/api/1.0/device/settings?token=\(token ?? "none")").responseJSON { response in
-            switch response.result {
-            case .success:
-                _ = JSON(response.result.value!)
-                
-                //AppDelegate.notificationsEnabled = json["notifications"] == "on" ? true : false
-                
-            case .failure(let error):
-                os_log("Alamofire device settings fetch error: %@", log: OSLog.default, type: .error, error.localizedDescription)
-            }
-        }
-    }
-    
-    static func saveToArchive(workouts: [Workout]) {
-        let isSuccessfulSave = NSKeyedArchiver.archiveRootObject(workouts, toFile: Workout.ArchiveURL.path)
-        
-        if isSuccessfulSave {
-            os_log("Workouts successfully saved.", log: OSLog.default, type: .debug)
-        } else {
-            os_log("Workouts failed saved.", log: OSLog.default, type: .error)
-        }
-    }
-    
-    static func fetchFromArchive() -> [Workout] {
-        return NSKeyedUnarchiver.unarchiveObject(withFile: Workout.ArchiveURL.path) as? [Workout] ?? [Workout]()
+        let url = URL(string: "https://hew.klck.in/api/1.0/device/settings?token=\(token ?? "none")")
+        let task = URLSession.shared.dataTask(with: url!)
+        task.resume()
+        UserDefaults.standard.set(UserDefaults.standard.integer(forKey: "get-settings-count") + 1, forKey: "get-settings-count")
     }
 
 }

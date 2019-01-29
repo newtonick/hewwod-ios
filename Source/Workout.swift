@@ -10,78 +10,77 @@ import Foundation
 import UIKit
 import os.log
 
-class Workout : NSObject, NSCoding {
+struct Workout: Codable {
     var id: String
     var name: String
     var text: String
     var date: Date
     var updated: Date
     var attributedText: NSAttributedString
-    
-    struct PropertyKey {
-        static let id = "id"
-        static let name = "name"
-        static let text = "text"
-        static let date = "date"
-        static let updated = "updated"
-        static let attributedText = "attributedText"
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case name
+        case text
+        case date
+        case updated
+        case attributedText
     }
     
-    static let DocumentsDirectory = FileManager().urls(for: .documentDirectory, in: .userDomainMask).first!
-    static let ArchiveURL = DocumentsDirectory.appendingPathComponent("workouts")
+    init?() {
+        self.id = ""
+        self.name = ""
+        self.text = ""
+        self.date = Date()
+        self.updated = Date()
+        self.attributedText = NSAttributedString(string: "")
+        
+        return nil
+    }
     
     init?(id: String, name: String, text: String, date: Date, updated: Date) {
+        if id.isEmpty || name.isEmpty { return nil }
         self.id = id
         self.name = name
         self.text = text
         self.date = date
         self.updated = updated
         
-        let style = NSMutableParagraphStyle()
-        style.alignment = NSTextAlignment.center
-        
-        self.attributedText = NKMarkupParser.attributedString(fromMarkup: text,
-                                                              font: UIFont(name: "Helvetica", size: 15),
-                                                              color: UIColor.white,
-                                                              paragraphStyle: style)
-        super.init()
-        
-        if name.isEmpty || text.isEmpty || id.isEmpty {
-            return nil
-        }
+        self.attributedText = Workout.attributedText(text: self.text)
     }
     
-    required convenience init?(coder aDecoder: NSCoder) {
-        // The name is required. If we cannot decode a name string, the initializer should fail.
-        guard let id = aDecoder.decodeObject(forKey: PropertyKey.id) as? String else {
-            os_log("Unable to decode the id for a Workout object.", log: OSLog.default, type: .debug)
-            return nil
-        }
+    init?(json:[String: Any]) {
+        if (json["_id"] as? String)!.isEmpty { return nil }
+        if (json["name"] as? String)!.isEmpty { return nil }
+        if (json["date"] as? String)!.isEmpty { return nil }
         
-        if let _ = aDecoder.decodeObject(forKey: PropertyKey.updated) {
-            
-        } else {
-            os_log("Unable to decode the updated field for a Workout object.", log: OSLog.default, type: .debug)
-            return nil
-        }
+        self.id = (json["_id"] as Any? as? String)!
+        self.name = (json["name"] as Any? as? String) ?? ""
+        self.text = (json["text"] as Any? as? String) ?? ""
+        self.date = Workout.stringDateConverter(date: (json["date"] as Any? as? String)!)
+        self.updated = Workout.stringDateConverter(date: (json["updated"] as Any? as? String)!)
         
-        let name = aDecoder.decodeObject(forKey: PropertyKey.name) as! String
-        let text = aDecoder.decodeObject(forKey: PropertyKey.text) as! String
-        let date = aDecoder.decodeObject(forKey: PropertyKey.date) as! Date
-        let updated = aDecoder.decodeObject(forKey: PropertyKey.updated) as! Date
-        let attributedText = aDecoder.decodeObject(forKey: PropertyKey.attributedText) as! NSAttributedString
-    
-        self.init(id: id, name: name, text: text, date: date, updated: updated)
-        self.attributedText = attributedText
+        self.attributedText = Workout.attributedText(text: self.text)
     }
     
-    func encode(with aCoder: NSCoder) {
-        aCoder.encode(id, forKey: PropertyKey.id)
-        aCoder.encode(name, forKey: PropertyKey.name)
-        aCoder.encode(text, forKey: PropertyKey.text)
-        aCoder.encode(date, forKey: PropertyKey.date)
-        aCoder.encode(updated, forKey: PropertyKey.updated)
-        aCoder.encode(attributedText, forKey: PropertyKey.attributedText)
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(name, forKey: .name)
+        try container.encode(text, forKey: .text)
+        try container.encode(date, forKey: .date)
+        try container.encode(updated, forKey: .updated)
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        text = try container.decode(String.self, forKey: .text)
+        date = try container.decode(Date.self, forKey: .date)
+        updated = try container.decode(Date.self, forKey: .updated)
+        
+        attributedText = Workout.attributedText(text: text)
     }
     
     static func stringDateConverter(date: String) -> Date {
@@ -92,6 +91,16 @@ class Workout : NSObject, NSCoding {
                                        .withColonSeparatorInTime]
         
         return dateFormatter.date(from: date) ?? Date()
+    }
+    
+    static func attributedText(text: String) -> NSAttributedString {
+        let style = NSMutableParagraphStyle()
+        style.alignment = NSTextAlignment.center
+        
+        return NKMarkupParser.attributedString(fromMarkup: text,
+                                               font: UIFont(name: "Helvetica", size: 15),
+                                               color: UIColor.white,
+                                               paragraphStyle: style)
     }
     
     func getDateString() -> String {
@@ -108,6 +117,5 @@ class Workout : NSObject, NSCoding {
             return (dateFormatter.string(from: self.date))
         }
     }
-    
     
 }
