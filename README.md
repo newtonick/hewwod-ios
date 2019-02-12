@@ -11,12 +11,6 @@ Clone the repo
 git clone https://github.com/newtonick/hewwod-ios.git
 ```
 
-Install [Carthage](https://github.com/Carthage/Carthage) and build the frameworks. Run Carthage in the project directory.
-
-```
-carthage update
-```
-
 Open the project hewwod.xcodeproj in Xcode. Build and Run
 
 ## Screenshots
