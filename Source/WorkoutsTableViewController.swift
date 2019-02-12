@@ -16,8 +16,25 @@ class WorkoutsTableViewController: UITableViewController {
     
     let appDelegate:AppDelegate = UIApplication.shared.delegate as! AppDelegate
     
+    @objc func handleRefresh(_ refreshControl: UIRefreshControl) {
+        self.appDelegate.workoutController.fetchWorksoutFromWeb(completion: { workouts in
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.6, execute: { refreshControl.endRefreshing()})
+            self.refreshTable()
+        }, failure: {
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.6, execute: { refreshControl.endRefreshing()})
+        })
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.tableView.refreshControl = UIRefreshControl()
+        
+        self.tableView.refreshControl!.addTarget(self, action:
+            #selector(self.handleRefresh(_:)), for: UIControl.Event.valueChanged)
+        
+        self.tableView.refreshControl!.tintColor = UIColor.black
+        self.tableView.refreshControl?.superview?.sendSubviewToBack(self.tableView.refreshControl!)
         
         //used temp to hide nav settings button
         //self.navigationItem.setRightBarButton(UIBarButtonItem.init(), animated: false)
@@ -139,7 +156,8 @@ class WorkoutsTableViewController: UITableViewController {
         self.appDelegate.workoutController.fetchWorkoutsFromUserDefaults(completion: { workouts in
             let defaultsWorkouts = workouts
             self.appDelegate.workoutController.fetchWorksoutFromWeb(completion: { workouts in
-                if defaultsWorkouts.count != workouts.count || defaultsWorkouts[0]?.updated != workouts[0].updated {
+                if defaultsWorkouts.count != workouts.count || defaultsWorkouts[0]?.updated != workouts[0].updated ||
+                    defaultsWorkouts[0]?.name != workouts[0].name {
                     self.refreshTable()
                 }
                 self.appDelegate.workoutController.saveWorkoutsToUserDefaults()
@@ -148,9 +166,10 @@ class WorkoutsTableViewController: UITableViewController {
         })
     }
     
-    private func refreshTable() {
+    func refreshTable() {
         DispatchQueue.main.async {
             self.tableView.reloadData()
         }
     }
+
 }

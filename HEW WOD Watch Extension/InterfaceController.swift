@@ -10,7 +10,7 @@ import WatchKit
 import Foundation
 import os.log
 
-class InterfaceController: WKInterfaceController {
+class InterfaceController: WKInterfaceController  {
 
     @IBOutlet weak var mainGroup: WKInterfaceGroup!
     @IBOutlet weak var titleGroup: WKInterfaceGroup!
@@ -33,13 +33,22 @@ class InterfaceController: WKInterfaceController {
         super.awake(withContext: context)
         
         os_log("WKInterfaceController Awake called", log: OSLog.default, type: .debug)
+        self.workoutController.watchInterface = self
         loadWorkout()
+    }
+    
+    func loadWorkoutFromUserDefault() {
+        self.workoutController.fetchLatestWorkoutFromUserDefault(completion: { workout in
+            if self.workoutController.isLatestWorkoutToday(){
+                self.refreshView()
+            }
+        })
     }
     
     func loadWorkout() {
         self.working = true
         self.workoutController.fetchLatestWorkoutFromUserDefault(completion: { workout in
-            if workout != nil && self.workoutController.isLatestWorkoutToday(){
+            if self.workoutController.isLatestWorkoutToday(){
                     self.refreshView()
             } else {
                 self.forceUpdateGroup.setHidden(true)
@@ -54,7 +63,13 @@ class InterfaceController: WKInterfaceController {
                 self.workoutController.saveLatestWorkoutToUserDefault()
                 self.working = false
             }, failure: {
-                if workout == nil || !self.workoutController.isLatestWorkoutToday(){
+                if workout == nil
+                {
+                    self.mainGroup.setHidden(true)
+                    self.loadingLabel.setHidden(false)
+                    self.loadingLabel.setText("Failed to Load")
+                    self.forceUpdateGroup.setHidden(false)
+                } else if !self.workoutController.isLatestWorkoutToday() {
                     self.mainGroup.setHidden(true)
                     self.loadingLabel.setHidden(false)
                     self.loadingLabel.setText("Failed to Load")
@@ -136,7 +151,7 @@ class InterfaceController: WKInterfaceController {
         
         os_log("WKInterfaceController willActivate called", log: OSLog.default, type: .debug)
         
-        if self.working == false && self.workoutController.latestWorkoutUpdated.addingTimeInterval(300) < Date() {
+        if self.working == false && self.workoutController.latestWorkoutUpdated.addingTimeInterval(60) < Date() {
             self.loadWorkout()
         }
     }

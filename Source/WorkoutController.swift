@@ -8,8 +8,9 @@
 
 import Foundation
 import os.log
+import WatchConnectivity
 
-class WorkoutController : NSObject {
+class WorkoutController : NSObject, WCSessionDelegate {
     
     var workouts:[Workout?] = [Workout]()
     var latestWorkout:Workout?
@@ -17,11 +18,32 @@ class WorkoutController : NSObject {
     var workoutsUpdated = Date()
     var latestWorkoutUpdated = Date()
 
+    #if os(watchOS)
+    var watchInterface:InterfaceController?
+    #endif
+    
+    override init() {
+        super.init()
+        
+        self.workoutsUpdated = UserDefaults.standard.object(forKey: "workoutsUpdated") as? Date ?? Date().addingTimeInterval(-300)
+        self.latestWorkoutUpdated = UserDefaults.standard.object(forKey: "latestWorkoutUpdated") as? Date ?? Date().addingTimeInterval(-300)
+        
+        if (WCSession.isSupported()) {
+            let session = WCSession.default
+            session.delegate = self
+            session.activate()
+        }
+    }
+
     func fetchWorksoutFromWeb(completion: @escaping ([Workout]) -> Void, failure: @escaping () ->Void){
         os_log("WorkoutController fetchWorksoutFromWeb called", log: OSLog.default, type: .debug)
-        var request = URLRequest(url: URL(string:"https://hew.klck.in/api/1.0/workouts")!)
+        var request = URLRequest(url: URL(string:"https://api.hewwod.com/api/1.0/workouts")!)
         request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-        let task = URLSession.shared.dataTask(with: request) {(data, response, error ) in
+        let sessionConfig = URLSessionConfiguration.default
+        sessionConfig.timeoutIntervalForRequest = 10.0
+        sessionConfig.timeoutIntervalForResource = 10.0
+        let session = URLSession(configuration: sessionConfig)
+        let task = session.dataTask(with: request) {(data, response, error ) in
             guard error == nil else {
                 os_log("WorkoutController fetchWorksoutFromWeb url call to /api/1.0/workouts failed", log: OSLog.default, type: .debug)
                 failure()
@@ -48,9 +70,13 @@ class WorkoutController : NSObject {
                     self.workouts = [Workout]()
                     
                     //load workouts from json into workouts array property
-                    for w in workouts {
+                    for (idx,w) in workouts.enumerated() {
                         let workout = Workout(json: w)
                         self.workouts += [workout]
+                        
+                        if idx == 0 {
+                            self.sendWatchMessage(workout: workout!)
+                        }
                     }
                     
                     // calls completion callback function and passes workout array with optionals removed
@@ -64,7 +90,7 @@ class WorkoutController : NSObject {
         
     func fetchLatestWorkoutFromWeb(completion: @escaping (Workout) -> Void, failure: @escaping () ->Void) {
         os_log("WorkoutController fetchLatestWorkoutFromWeb called", log: OSLog.default, type: .debug)
-        var request = URLRequest(url: URL(string:"https://hew.klck.in/api/1.0/workout")!)
+        var request = URLRequest(url: URL(string:"https://api.hewwod.com/api/1.0/workout")!)
         request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
         let sessionConfig = URLSessionConfiguration.default
         sessionConfig.timeoutIntervalForRequest = 10.0
@@ -107,8 +133,9 @@ class WorkoutController : NSObject {
         os_log("WorkoutController saveWorkoutsToUserDefaults called", log: OSLog.default, type: .debug)
         let encodedData = try! JSONEncoder().encode(self.workouts)
         UserDefaults.standard.set(encodedData, forKey: "workouts")
-        UserDefaults.standard.synchronize()
         self.workoutsUpdated = Date()
+        UserDefaults.standard.set(self.workoutsUpdated, forKey:"workoutsUpdated")
+        UserDefaults.standard.synchronize()
     }
     
     func fetchWorkoutsFromUserDefaults(completion: @escaping ([Workout?]) -> Void) {
@@ -124,8 +151,9 @@ class WorkoutController : NSObject {
         os_log("WorkoutController saveLatestWorkoutToUserDefault called", log: OSLog.default, type: .debug)
         let encodedData = try! JSONEncoder().encode(self.latestWorkout)
         UserDefaults.standard.set(encodedData, forKey: "latest-workout")
-        UserDefaults.standard.synchronize()
         self.latestWorkoutUpdated = Date()
+        UserDefaults.standard.set(self.workoutsUpdated, forKey:"latestWorkoutUpdated")
+        UserDefaults.standard.synchronize()
     }
     
     func fetchLatestWorkoutFromUserDefault(completion: @escaping (Workout?) -> Void) {
@@ -144,9 +172,14 @@ class WorkoutController : NSObject {
         dateFormatter.locale = Locale(identifier: "en_US")
 
         if self.localDateString(date: (self.latestWorkout?.date) ?? Date().addingTimeInterval(-86400)) == self.localDateString(date: Date()) {
+            //print("latest workout is today")
             return true
         }
         
+        //print(self.localDateString(date: (self.latestWorkout?.date) ?? Date().addingTimeInterval(-86400)))
+        //print(" == ")
+        //print(self.localDateString(date: Date()))
+        //print("false: latest workout is today")
         return false
     }
     
@@ -157,4 +190,42 @@ class WorkoutController : NSObject {
         
         return dateFormatter.string(from: date)
     }
+    
+    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
+        
+    }
+    
+    #if os(iOS)
+    func sessionDidBecomeInactive(_ session: WCSession) {
+        
+    }
+    
+    func sessionDidDeactivate(_ session: WCSession) {
+        
+    }
+    #endif
+    
+    func sendWatchMessage(workout:Workout) {
+        print("sendWatchMessage")
+        if (WCSession.default.activationState == .activated) {
+            print("watch is paired and activated")
+            let encodedData = try! JSONEncoder().encode(workout)
+            let message = ["workout": encodedData]
+            WCSession.default.transferUserInfo(message)
+        }
+        
+        print(WCSession.default.outstandingUserInfoTransfers)
+    }
+    
+    func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any] = [:]) {
+        print("didReceiveUserInfo")
+        print(userInfo)
+        let latestWorkout = try! JSONDecoder().decode(Workout.self, from: userInfo["workout"] as! Data)
+        self.latestWorkout = latestWorkout
+        self.saveLatestWorkoutToUserDefault()
+        #if os(watchOS)
+            self.watchInterface?.loadWorkoutFromUserDefault()
+        #endif
+    }
+
 }

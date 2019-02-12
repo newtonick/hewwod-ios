@@ -201,7 +201,7 @@ class SettingsTableViewController: UITableViewController, UIPickerViewDataSource
         let wodminute:Int = calendar.component(.minute, from: self.dailyWODTimePicker.date)
         let timezone:String = self.curTimeZone
         
-        let url = URL(string: "https://hew.klck.in/api/1.0/device/settings?uuid=\(uuid)&token=\(token)&noti=\(noti)&wod=\(wod)&wodhour=\(wodhour)&wodminute=\(wodminute)&timezone=\(timezone)")
+        let url = URL(string: "https://api.hewwod.com/api/1.0/device/settings?uuid=\(uuid)&token=\(token)&noti=\(noti)&wod=\(wod)&wodhour=\(wodhour)&wodminute=\(wodminute)&timezone=\(timezone)")
         let task = URLSession.shared.dataTask(with: url!)
         task.resume()
         UserDefaults.standard.set(UserDefaults.standard.integer(forKey: "save-settings-count") + 1, forKey: "save-settings-count")

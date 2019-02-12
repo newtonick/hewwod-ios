@@ -52,7 +52,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillEnterForeground(_ application: UIApplication) {
         // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
         os_log("applicationWillEnterForeground", log: OSLog.default, type: .debug)
-        if self.working == false && self.workoutController.workoutsUpdated.addingTimeInterval(900) < Date() {
+        if self.working == false && self.workoutController.workoutsUpdated.addingTimeInterval(300) < Date() {
             self.workoutsTableViewController?.loadWorkouts()
         }
     }
@@ -80,9 +80,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         os_log("Device Token %@", log: OSLog.default, type: .debug, token.description)
 
         //push token to api
-        var urlString = "https://hew.klck.in/api/1.0/device/add?token=\(token)&env=production&notifications=\(noti)"
+        var urlString = "https://api.hewwod.com/api/1.0/device/add?token=\(token)&env=production&notifications=\(noti)"
         #if DEBUG
-        urlString = "https://hew.klck.in/api/1.0/device/add?token=\(token)&env=sandbox&notifications=\(noti)"
+        urlString = "https://api.hewwod.com/api/1.0/device/add?token=\(token)&env=sandbox&notifications=\(noti)"
         #endif
         let url = URL(string: urlString)
         let task = URLSession.shared.dataTask(with: url!)
@@ -138,12 +138,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.workoutController.fetchWorksoutFromWeb(completion: { workouts in
             self.workoutController.saveWorkoutsToUserDefaults()
             completionHandler(UIBackgroundFetchResult.newData)
+            self.workoutsTableViewController?.refreshTable()
         }, failure: {})
     }
     
     static func getDeviceSettings() {
         let token = UserDefaults.standard.string(forKey: "token")
-        let url = URL(string: "https://hew.klck.in/api/1.0/device/settings?token=\(token ?? "none")")
+        let url = URL(string: "https://api.hewwod.com/api/1.0/device/settings?token=\(token ?? "none")")
         let task = URLSession.shared.dataTask(with: url!)
         task.resume()
         UserDefaults.standard.set(UserDefaults.standard.integer(forKey: "get-settings-count") + 1, forKey: "get-settings-count")
