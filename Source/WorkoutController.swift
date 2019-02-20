@@ -17,6 +17,8 @@ class WorkoutController : NSObject, WCSessionDelegate {
     
     var workoutsUpdated = Date()
     var latestWorkoutUpdated = Date()
+    
+    var loadInprogress:Bool = false
 
     #if os(watchOS)
     var watchInterface:InterfaceController?
@@ -25,8 +27,8 @@ class WorkoutController : NSObject, WCSessionDelegate {
     override init() {
         super.init()
         
-        self.workoutsUpdated = UserDefaults.standard.object(forKey: "workoutsUpdated") as? Date ?? Date().addingTimeInterval(-300)
-        self.latestWorkoutUpdated = UserDefaults.standard.object(forKey: "latestWorkoutUpdated") as? Date ?? Date().addingTimeInterval(-300)
+        self.workoutsUpdated = UserDefaults.standard.object(forKey: "workoutsUpdated") as? Date ?? Date().addingTimeInterval(-301)
+        self.latestWorkoutUpdated = UserDefaults.standard.object(forKey: "latestWorkoutUpdated") as? Date ?? Date().addingTimeInterval(-301)
         
         if (WCSession.isSupported()) {
             let session = WCSession.default
@@ -35,98 +37,112 @@ class WorkoutController : NSObject, WCSessionDelegate {
         }
     }
 
-    func fetchWorksoutFromWeb(completion: @escaping ([Workout]) -> Void, failure: @escaping () ->Void){
+    func fetchWorkoutsFromWeb(completion: @escaping ([Workout]) -> Void, failure: @escaping () ->Void){
         os_log("WorkoutController fetchWorksoutFromWeb called", log: OSLog.default, type: .debug)
-        var request = URLRequest(url: URL(string:"https://api.hewwod.com/api/1.0/workouts")!)
-        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-        let sessionConfig = URLSessionConfiguration.default
-        sessionConfig.timeoutIntervalForRequest = 10.0
-        sessionConfig.timeoutIntervalForResource = 10.0
-        let session = URLSession(configuration: sessionConfig)
-        let task = session.dataTask(with: request) {(data, response, error ) in
-            guard error == nil else {
-                os_log("WorkoutController fetchWorksoutFromWeb url call to /api/1.0/workouts failed", log: OSLog.default, type: .debug)
-                failure()
-                return
-            }
-            
-            guard let content = data else {
-                os_log("WorkoutController fetchWorksoutFromWeb url call to /api/1.0/workout has no data", log: OSLog.default, type: .debug)
-                failure()
-                return
-            }
-            
-            guard let json = (try? JSONSerialization.jsonObject(with: content, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] else {
-                os_log("WorkoutController fetchWorksoutFromWeb url call to /api/1.0/workout does not have valid JSON", log: OSLog.default, type: .debug)
-                failure()
-                return
-            }
-            
-            UserDefaults.standard.set(UserDefaults.standard.integer(forKey: "fetch-workouts-count") + 1, forKey: "fetch-workouts-count")
-            
-            if json["status"] != nil && json["status"] as? String == "success" {
-                if let workouts = json["workouts"] as? [[String: Any]] {
-                    //empty workouts array and populate from json (replace)
-                    self.workouts = [Workout]()
-                    
-                    //load workouts from json into workouts array property
-                    for (idx,w) in workouts.enumerated() {
-                        let workout = Workout(json: w)
-                        self.workouts += [workout]
-                        
-                        if idx == 0 {
-                            self.sendWatchMessage(workout: workout!)
-                        }
-                    }
-                    
-                    // calls completion callback function and passes workout array with optionals removed
-                    completion(self.workouts.compactMap{$0})
-                    os_log("WorkoutControllerfetch WorksoutFromWeb complete", log: OSLog.default, type: .debug)
+        if self.loadInprogress == false {
+            self.loadInprogress = true
+            os_log("WorkoutController fetchWorksoutFromWeb started", log: OSLog.default, type: .debug)
+            let uuid = UserDefaults.standard.string(forKey: "uuid") ?? "empty"
+            var request = URLRequest(url: URL(string:"https://api.hewwod.com/api/1.0/workouts?src=ios&uuid=\(uuid)")!)
+            request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+            let sessionConfig = URLSessionConfiguration.default
+            sessionConfig.timeoutIntervalForRequest = 10.0
+            sessionConfig.timeoutIntervalForResource = 10.0
+            let session = URLSession(configuration: sessionConfig)
+            let task = session.dataTask(with: request) {(data, response, error ) in
+                guard error == nil else {
+                    os_log("WorkoutController fetchWorksoutFromWeb url call to /api/1.0/workouts failed", log: OSLog.default, type: .debug)
+                    failure()
+                    self.loadInprogress = false
+                    return
                 }
+                
+                guard let content = data else {
+                    os_log("WorkoutController fetchWorksoutFromWeb url call to /api/1.0/workout has no data", log: OSLog.default, type: .debug)
+                    failure()
+                    self.loadInprogress = false
+                    return
+                }
+                
+                guard let json = (try? JSONSerialization.jsonObject(with: content, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] else {
+                    os_log("WorkoutController fetchWorksoutFromWeb url call to /api/1.0/workout does not have valid JSON", log: OSLog.default, type: .debug)
+                    failure()
+                    self.loadInprogress = false
+                    return
+                }
+                
+                if json["status"] != nil && json["status"] as? String == "success" {
+                    var tempWorkouts = [Workout?]()
+                    if let workouts = json["workouts"] as? [[String: Any]] {
+                        //load workouts from json into workouts array property
+                        for (idx,w) in workouts.enumerated() {
+                            let workout = Workout(json: w)
+                            tempWorkouts += [workout]
+                            
+                            if idx == 0 {
+                                self.sendWatchMessage(workout: workout!)
+                            }
+                        }
+                        self.workouts = tempWorkouts
+                        
+                        // calls completion callback function and passes workout array with optionals removed
+                        completion(self.workouts.compactMap{$0})
+                        os_log("WorkoutControllerfetch WorksoutFromWeb complete", log: OSLog.default, type: .debug)
+                    }
+                }
+                self.loadInprogress = false
             }
+            task.resume()
         }
-        task.resume()
     }
         
     func fetchLatestWorkoutFromWeb(completion: @escaping (Workout) -> Void, failure: @escaping () ->Void) {
         os_log("WorkoutController fetchLatestWorkoutFromWeb called", log: OSLog.default, type: .debug)
-        var request = URLRequest(url: URL(string:"https://api.hewwod.com/api/1.0/workout")!)
-        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-        let sessionConfig = URLSessionConfiguration.default
-        sessionConfig.timeoutIntervalForRequest = 10.0
-        sessionConfig.timeoutIntervalForResource = 10.0
-        let session = URLSession(configuration: sessionConfig)
-        let task = session.dataTask(with: request) {(data, response, error ) in
-            guard error == nil else {
-                os_log("WorkoutController fetchLatestWorkoutFromWeb url call to /api/1.0/workouts failed", log: OSLog.default, type: .debug)
-                failure()
-                return
-            }
-            
-            guard let content = data else {
-                os_log("WorkoutController fetchLatestWorkoutFromWeb url call to /api/1.0/workout has no data", log: OSLog.default, type: .debug)
-                failure()
-                return
-            }
-            
-            guard let json = (try? JSONSerialization.jsonObject(with: content, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] else {
-                os_log("WorkoutController fetchLatestWorkoutFromWeb url call to /api/1.0/workout does not have valid JSON", log: OSLog.default, type: .debug)
-                failure()
-                return
-            }
-            
-            UserDefaults.standard.set(UserDefaults.standard.integer(forKey: "fetch-latest-workout-count") + 1, forKey: "fetch-latest-workout-count")
-            
-            if json["status"] != nil && json["status"] as? String == "success" {
-                if let w = json["workout"] as? [String: Any] {
-                    //load latest workout from json
-                    self.latestWorkout = Workout(json: w)
-                    completion(self.latestWorkout!)
-                    os_log("WorkoutController fetchLatestWorkoutFromWeb complete", log: OSLog.default, type: .debug)
+        if self.loadInprogress == false {
+            self.loadInprogress = true
+            os_log("WorkoutController fetchLatestWorkoutFromWeb started", log: OSLog.default, type: .debug)
+            let uuid = UserDefaults.standard.string(forKey: "uuid") ?? "empty"
+            var request = URLRequest(url: URL(string:"https://api.hewwod.com/api/1.0/workout?src=ios&uuid=\(uuid)")!)
+            request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+            let sessionConfig = URLSessionConfiguration.default
+            sessionConfig.timeoutIntervalForRequest = 10.0
+            sessionConfig.timeoutIntervalForResource = 10.0
+            let session = URLSession(configuration: sessionConfig)
+            let task = session.dataTask(with: request) {(data, response, error ) in
+                guard error == nil else {
+                    os_log("WorkoutController fetchLatestWorkoutFromWeb url call to /api/1.0/workouts failed", log: OSLog.default, type: .debug)
+                    failure()
+                    self.loadInprogress = false
+                    return
                 }
+                
+                guard let content = data else {
+                    os_log("WorkoutController fetchLatestWorkoutFromWeb url call to /api/1.0/workout has no data", log: OSLog.default, type: .debug)
+                    failure()
+                    self.loadInprogress = false
+                    return
+                }
+                
+                guard let json = (try? JSONSerialization.jsonObject(with: content, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] else {
+                    os_log("WorkoutController fetchLatestWorkoutFromWeb url call to /api/1.0/workout does not have valid JSON", log: OSLog.default, type: .debug)
+                    failure()
+                    self.loadInprogress = false
+                    return
+                }
+                
+                if json["status"] != nil && json["status"] as? String == "success" {
+                    if let w = json["workout"] as? [String: Any] {
+                        //load latest workout from json
+                        let lw = Workout(json: w)
+                        self.latestWorkout = lw
+                        completion(self.latestWorkout!)
+                        os_log("WorkoutController fetchLatestWorkoutFromWeb complete", log: OSLog.default, type: .debug)
+                    }
+                }
+                self.loadInprogress = false
             }
+            task.resume()
         }
-        task.resume()
     }
     
     func saveWorkoutsToUserDefaults() {

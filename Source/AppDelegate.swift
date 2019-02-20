@@ -18,9 +18,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var working:Bool = false
     var workoutsTableViewController:WorkoutsTableViewController?
     
-    static var backgroundFetch:Bool = false
-    static var backgroundFetchComplete:Bool = false
-    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         if UserDefaults.standard.object(forKey: "uuid") == nil {
@@ -28,8 +25,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             UserDefaults.standard.set(UUID, forKey: "uuid")
             UserDefaults.standard.synchronize()
         }
-        
-        AppDelegate.backgroundFetchComplete = false
+
         UIApplication.shared.setMinimumBackgroundFetchInterval(TimeInterval(exactly: 21600.00)!) //6 Hours
         
         registerForProvisionalPushNotifications()
@@ -52,8 +48,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillEnterForeground(_ application: UIApplication) {
         // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
         os_log("applicationWillEnterForeground", log: OSLog.default, type: .debug)
+        os_log("working == %@", log: OSLog.default, type: .debug, self.working.description)
+        os_log("workoutsUpdated == %@", log: OSLog.default, type: .debug, self.workoutController.workoutsUpdated.description)
+        os_log("tableViewUpdated == %@", log: OSLog.default, type: .debug, self.workoutsTableViewController?.tableViewUpdated.description ?? Date().addingTimeInterval(5).description)
         if self.working == false && self.workoutController.workoutsUpdated.addingTimeInterval(300) < Date() {
             self.workoutsTableViewController?.loadWorkouts()
+        } else if self.workoutsTableViewController?.tableViewUpdated.addingTimeInterval(60) ?? Date().addingTimeInterval(5) < Date() {
+            self.workoutsTableViewController?.refreshTable()
         }
     }
 
@@ -123,19 +124,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         os_log("performFetchWithCompletionHandler", log: OSLog.default, type: .debug)
-        UserDefaults.standard.set(UserDefaults.standard.integer(forKey: "background-fetch-count") + 1, forKey: "background-fetch-count")
-        AppDelegate.backgroundFetch = true
-        self.workoutController.fetchWorksoutFromWeb(completion: { workouts in
+        self.workoutController.fetchWorkoutsFromWeb(completion: { workouts in
             self.workoutController.saveWorkoutsToUserDefaults()
-            AppDelegate.backgroundFetch = false
-            AppDelegate.backgroundFetchComplete = true
             completionHandler(UIBackgroundFetchResult.newData)
         }, failure: {})
     }
     
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         os_log("didReceiveRemoteNotification", log: OSLog.default, type: .debug)
-        self.workoutController.fetchWorksoutFromWeb(completion: { workouts in
+        self.workoutController.fetchWorkoutsFromWeb(completion: { workouts in
             self.workoutController.saveWorkoutsToUserDefaults()
             completionHandler(UIBackgroundFetchResult.newData)
             self.workoutsTableViewController?.refreshTable()

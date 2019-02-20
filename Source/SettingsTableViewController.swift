@@ -16,9 +16,6 @@ class SettingsTableViewController: UITableViewController, UIPickerViewDataSource
     @IBOutlet weak var dailyWODReminderSwitch: UISwitch!
     @IBOutlet weak var dailyWODTimePicker: UIDatePicker!
     @IBOutlet weak var timezonePicker: UIPickerView!
-    @IBOutlet weak var fetchWebCount: UILabel!
-    @IBOutlet weak var saveSettingsCount: UILabel!
-    @IBOutlet weak var addTokenCount: UILabel!
     
     var timezonePickerDataSource = ["America/New_York", "America/Chicago", "America/Denver", "America/Los_Angeles", "Pacific/Honolulu"];
     
@@ -95,9 +92,7 @@ class SettingsTableViewController: UITableViewController, UIPickerViewDataSource
     }
     
     override func viewDidAppear(_ animated: Bool) {
-        self.fetchWebCount.text = String(UserDefaults.standard.integer(forKey: "fetch-workouts-count"))
-        self.saveSettingsCount.text = String(UserDefaults.standard.integer(forKey: "save-settings-count"))
-        self.addTokenCount.text = String(UserDefaults.standard.integer(forKey: "add-token-count"))
+        
     }
 
     @IBAction func doneButtonPressed(_ sender: UIBarButtonItem) {
@@ -204,7 +199,6 @@ class SettingsTableViewController: UITableViewController, UIPickerViewDataSource
         let url = URL(string: "https://api.hewwod.com/api/1.0/device/settings?uuid=\(uuid)&token=\(token)&noti=\(noti)&wod=\(wod)&wodhour=\(wodhour)&wodminute=\(wodminute)&timezone=\(timezone)")
         let task = URLSession.shared.dataTask(with: url!)
         task.resume()
-        UserDefaults.standard.set(UserDefaults.standard.integer(forKey: "save-settings-count") + 1, forKey: "save-settings-count")
     }
     
     func numberOfComponents(in pickerView: UIPickerView) -> Int {

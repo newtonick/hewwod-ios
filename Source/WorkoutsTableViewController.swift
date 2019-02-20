@@ -16,16 +16,20 @@ class WorkoutsTableViewController: UITableViewController {
     
     let appDelegate:AppDelegate = UIApplication.shared.delegate as! AppDelegate
     
+    var tableViewUpdated = Date()
+    
     @objc func handleRefresh(_ refreshControl: UIRefreshControl) {
-        self.appDelegate.workoutController.fetchWorksoutFromWeb(completion: { workouts in
+        self.appDelegate.workoutController.fetchWorkoutsFromWeb(completion: { workouts in
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.6, execute: { refreshControl.endRefreshing()})
             self.refreshTable()
+            self.appDelegate.workoutController.saveWorkoutsToUserDefaults()
         }, failure: {
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.6, execute: { refreshControl.endRefreshing()})
         })
     }
     
     override func viewDidLoad() {
+        os_log("viewDidLoad", log: OSLog.default, type: .debug)
         super.viewDidLoad()
         
         self.tableView.refreshControl = UIRefreshControl()
@@ -59,6 +63,8 @@ class WorkoutsTableViewController: UITableViewController {
         
         self.appDelegate.workoutsTableViewController = self
         
+        self.tableViewUpdated = UserDefaults.standard.object(forKey: "tableViewUpdated") as? Date ?? Date().addingTimeInterval(-60)
+        
         // loads the userdefaults and pulls down the web updates
         self.loadWorkouts()
         
@@ -71,8 +77,9 @@ class WorkoutsTableViewController: UITableViewController {
         self.refreshNavButton.isEnabled = false;
         Timer.scheduledTimer(timeInterval: 5, target: self, selector: #selector(enableRefresh), userInfo: nil, repeats: false)
         self.tableView.setContentOffset(.zero, animated: false)
-        self.appDelegate.workoutController.fetchWorksoutFromWeb(completion: { workouts in
+        self.appDelegate.workoutController.fetchWorkoutsFromWeb(completion: { workouts in
             self.refreshTable()
+            self.appDelegate.workoutController.saveWorkoutsToUserDefaults()
         }, failure: {})
     }
     
@@ -82,6 +89,9 @@ class WorkoutsTableViewController: UITableViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         os_log("viewWillAppear", log: OSLog.default, type: .debug)
+        if self.tableViewUpdated.addingTimeInterval(60) < Date() {
+            self.refreshTable()
+        }
     }
     
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -93,32 +103,35 @@ class WorkoutsTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        os_log("loading tableView Cell: %@", log: OSLog.default, type: .debug, self.appDelegate.workoutController.workouts[indexPath.row]!.name)
+        
         let cellIdentifier = "WorkoutTableViewCell"
         
         guard let cell = self.tableView.dequeueReusableCell(withIdentifier: cellIdentifier) as? WorkoutTableViewCell else {
             fatalError("The cell is not an instance of WorkoutTableViewCell.")
         }
         
-        //set cell values
-        cell.workoutName.text = self.appDelegate.workoutController.workouts[indexPath.row]?.name
-        cell.workoutText.text = self.appDelegate.workoutController.workouts[indexPath.row]?.text
-        cell.workoutDate.text = self.appDelegate.workoutController.workouts[indexPath.row]?.getDateString()
-        cell.workoutText.attributedText = self.appDelegate.workoutController.workouts[indexPath.row]?.attributedText
-        
-        if cell.workoutDate.text == "Today" {
-            cell.nameBar.backgroundColor = UIColor(red:0.20, green:0.20, blue:0.20, alpha:1.00)
-        } else {
-            cell.nameBar.backgroundColor = UIColor.darkGray
+        if self.appDelegate.workoutController.workouts.count >= indexPath.row {
+            os_log("loading tableView Cell: %@", log: OSLog.default, type: .debug, self.appDelegate.workoutController.workouts[indexPath.row]?.name ?? "undefined")
+            
+            //set cell values
+            cell.workoutName.text = self.appDelegate.workoutController.workouts[indexPath.row]?.name
+            cell.workoutText.text = self.appDelegate.workoutController.workouts[indexPath.row]?.text
+            cell.workoutDate.text = self.appDelegate.workoutController.workouts[indexPath.row]?.getDateString()
+            cell.workoutText.attributedText = self.appDelegate.workoutController.workouts[indexPath.row]?.attributedText
+            
+            if cell.workoutDate.text == "Today" {
+                cell.nameBar.backgroundColor = UIColor(red:0.20, green:0.20, blue:0.20, alpha:1.00)
+            } else {
+                cell.nameBar.backgroundColor = UIColor.darkGray
+            }
+            
+            //setup cell shadow
+            cell.layer.masksToBounds = false
+            cell.layer.shadowColor = UIColor.black.cgColor
+            cell.layer.shadowOpacity = 0.35
+            cell.layer.shadowOffset = CGSize(width: 0, height: 2.0)
+            cell.layer.shadowRadius = 2
         }
-        
-        //setup cell shadow
-        cell.layer.masksToBounds = false
-        cell.layer.shadowColor = UIColor.black.cgColor
-        cell.layer.shadowOpacity = 0.35
-        cell.layer.shadowOffset = CGSize(width: 0, height: 2.0)
-        cell.layer.shadowRadius = 2
-        
         return cell
     }
 
@@ -127,11 +140,16 @@ class WorkoutsTableViewController: UITableViewController {
         let screenWidth = UIScreen.main.bounds.width
         
         let cgsize = CGSize(width: screenWidth - 46, height: 10000)
-        let rect = self.appDelegate.workoutController.workouts[indexPath.row]!.attributedText.boundingRect(with: cgsize, options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
-
-        os_log("Height tableView Cell: %@", log: OSLog.default, type: .debug, rect.height.description)
         
-        return CGFloat(90 + rect.height);
+        if self.appDelegate.workoutController.workouts.count >= indexPath.row {
+            let rect = self.appDelegate.workoutController.workouts[indexPath.row]!.attributedText.boundingRect(with: cgsize, options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
+            os_log("Height tableView Cell: %@", log: OSLog.default, type: .debug, rect.height.description)
+            
+            return CGFloat(90 + rect.height);
+        } else {
+            os_log("Default Height Returned to tableView Cell", log: OSLog.default, type: .debug)
+            return CGFloat(200);
+        };
     }
     
     override func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat
@@ -155,14 +173,19 @@ class WorkoutsTableViewController: UITableViewController {
         self.appDelegate.working = true
         self.appDelegate.workoutController.fetchWorkoutsFromUserDefaults(completion: { workouts in
             let defaultsWorkouts = workouts
-            self.appDelegate.workoutController.fetchWorksoutFromWeb(completion: { workouts in
+            if self.tableViewUpdated.addingTimeInterval(60) < Date() {
+                self.refreshTable()
+            }
+            self.appDelegate.workoutController.fetchWorkoutsFromWeb(completion: { workouts in
                 if defaultsWorkouts.count != workouts.count || defaultsWorkouts[0]?.updated != workouts[0].updated ||
                     defaultsWorkouts[0]?.name != workouts[0].name {
+                    self.refreshTable()
+                } else if self.tableViewUpdated.addingTimeInterval(60) < Date() {
                     self.refreshTable()
                 }
                 self.appDelegate.workoutController.saveWorkoutsToUserDefaults()
                 self.appDelegate.working = false
-            }, failure: {})
+            }, failure: { self.appDelegate.working = false })
         })
     }
     
@@ -170,6 +193,9 @@ class WorkoutsTableViewController: UITableViewController {
         DispatchQueue.main.async {
             self.tableView.reloadData()
         }
+        self.tableViewUpdated = Date()
+        UserDefaults.standard.set(self.tableViewUpdated, forKey:"tableViewUpdated")
+        UserDefaults.standard.synchronize()
     }
 
 }

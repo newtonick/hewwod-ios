@@ -29,8 +29,12 @@ class InterfaceController: WKInterfaceController  {
     
     var workoutController:WorkoutController = WorkoutController()
 
+    var interfaceViewUpdated = Date()
+    
     override func awake(withContext context: Any?) {
         super.awake(withContext: context)
+        
+        self.interfaceViewUpdated = UserDefaults.standard.object(forKey: "interfaceViewUpdated") as? Date ?? Date().addingTimeInterval(-15)
         
         os_log("WKInterfaceController Awake called", log: OSLog.default, type: .debug)
         self.workoutController.watchInterface = self
@@ -46,6 +50,7 @@ class InterfaceController: WKInterfaceController  {
     }
     
     func loadWorkout() {
+        os_log("loadWorkout called", log: OSLog.default, type: .debug)
         self.working = true
         self.workoutController.fetchLatestWorkoutFromUserDefault(completion: { workout in
             if self.workoutController.isLatestWorkoutToday(){
@@ -72,14 +77,16 @@ class InterfaceController: WKInterfaceController  {
                 } else if !self.workoutController.isLatestWorkoutToday() {
                     self.mainGroup.setHidden(true)
                     self.loadingLabel.setHidden(false)
-                    self.loadingLabel.setText("Failed to Load")
+                    self.loadingLabel.setText("No Workout Sunday")
                     self.forceUpdateGroup.setHidden(false)
                 }
+                self.working = false
             })
         })
     }
     
     func refreshView() {
+        os_log("refreshView called", log: OSLog.default, type: .debug)
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [.withFullDate,
                                        .withTime,
@@ -143,6 +150,10 @@ class InterfaceController: WKInterfaceController  {
                 self.loadingLabel.setHorizontalAlignment(.center)
             }
         }
+        
+        self.interfaceViewUpdated = Date()
+        UserDefaults.standard.set(self.interfaceViewUpdated, forKey:"interfaceViewUpdated")
+        UserDefaults.standard.synchronize()
     }
     
     override func willActivate() {
@@ -151,8 +162,14 @@ class InterfaceController: WKInterfaceController  {
         
         os_log("WKInterfaceController willActivate called", log: OSLog.default, type: .debug)
         
+        os_log("working == %@", log: OSLog.default, type: .debug, self.working.description)
+        os_log("workoutsUpdated == %@", log: OSLog.default, type: .debug, self.workoutController.latestWorkoutUpdated.description)
+        os_log("interfaceViewUpdated == %@", log: OSLog.default, type: .debug, self.interfaceViewUpdated.description)
+        
         if self.working == false && self.workoutController.latestWorkoutUpdated.addingTimeInterval(60) < Date() {
             self.loadWorkout()
+        } else if self.interfaceViewUpdated.addingTimeInterval(15) < Date() {
+            self.refreshView()
         }
     }
     
